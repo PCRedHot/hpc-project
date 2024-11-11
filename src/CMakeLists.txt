@@ -2,7 +2,7 @@
 add_library(fin_diff_lib STATIC 
     mesh2d.cpp
     lhs2d.cpp
-    matrix.cpp
+    matrix.tpp
     )
 
 # Include directories for this target
