@@ -12,7 +12,7 @@ FetchContent_MakeAvailable(Catch2)
 # Add the test executable
 add_executable(tests
     test_mesh2d.cpp
-    # Add other test files here
+    test_matrix.cpp
 )
 
 # Link the Catch2 library and your static library to the test executable
