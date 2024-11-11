@@ -21,7 +21,7 @@ template <typename _T>
 Matrix<_T>::Matrix(size_t rows, size_t cols) : MatrixBase<_T>(rows, cols) {
     std::cout << rows << "x" << cols << " Matrix Created" << std::endl;
     
-    data = new _T[rows * cols];
+    data = static_cast<_T*>(std::calloc(rows * cols, sizeof(_T)));
 }
 
 template <typename _T>
@@ -126,13 +126,42 @@ void MatrixCRS<_T>::set(size_t i, size_t j, _T val) {
 
 template <typename _T>
 MatrixCRS<_T> MatrixCRS<_T>::from_dense(const Matrix<_T>& mat) {
-    // TODO: Implement conversion from dense matrix to CRS format
-    return MatrixCRS<_T>(mat.get_rows(), mat.get_cols());
+    MatrixCRS<_T> crs(mat.get_rows(), mat.get_cols());
+
+    for (size_t i = 0; i < mat.get_rows(); i++) {
+        bool has_non_zero = false;
+        for (size_t j = 0; j < mat.get_cols(); j++) {
+            _T val = mat.get(i, j);
+            if (val != _T{}) {
+                crs.values.push_back(val);
+                crs.col_indices.push_back(j);
+                
+                if (!has_non_zero) {
+                    has_non_zero = true;
+                    crs.row_ptrs[i] = crs.values.size() - 1;
+                }
+            }
+        }
+
+        if (!has_non_zero) {
+            crs.row_ptrs[i] = crs.values.size();
+        }
+    }
+
+    crs.row_ptrs[crs.get_rows()] = crs.values.size();
+
+    return crs;
 }
 
 template <typename _T>
 void MatrixCRS<_T>::print() const {
-    this->MatrixBase<_T>::print();      // TODO: Better way to print the matrix
+    // TODO: Better way to print the matrix
+    for (size_t i = 0; i < this->rows; ++i) {
+        for (size_t j = 0; j < this->cols; ++j) {
+            std::cout << get(i, j) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 template <typename _T>
@@ -150,7 +179,7 @@ void MatrixCRS<_T>::_remove(size_t i, size_t j) {
 }
 
 template <typename _T>
-size_t MatrixCRS<_T>::_find(size_t i, size_t j) {
+size_t MatrixCRS<_T>::_find(size_t i, size_t j) const {
     this->validate(i, j);
 
     size_t cur_ptr = row_ptrs[i];
