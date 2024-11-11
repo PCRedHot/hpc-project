@@ -20,7 +20,7 @@ class Mesh2D {
     virtual const std::vector<std::pair<double, double>>& get_coordinates()
         const;
     virtual const std::vector<std::pair<size_t, size_t>>& get_lines() const;
-    // virtual const std::vector<std::pair<size_t, size_t>>& get_faces() const;
+    // virtual const std::vector<std::pair<size_t, size_t>>& get_faces() const;     // TODO Face Support for visualization
     virtual const std::vector<double>& get_line_distance() const;
 
     void write_to_vtk(const std::string& filename) const;
