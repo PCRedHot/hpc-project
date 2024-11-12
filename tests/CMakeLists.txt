@@ -16,7 +16,7 @@ add_executable(tests
     test_matrix_legacy.cpp
     test_discrete_2d.cpp
     test_exprtk.cpp
-    # test_utils.cpp
+    test_solver.cpp
 )
 
 # Link the Catch2 library and your static library to the test executable

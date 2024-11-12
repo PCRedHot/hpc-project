@@ -116,9 +116,9 @@ TEST_CASE("Matrix Manipulation 4", "[matrix_man_4]") {
 
 
 TEST_CASE("Matrix Manipulation 5", "[matrix_man_5]") {
-    MatrixCRS<int> mat1 = MatrixCRS<int>::from_dense(Matrix<int>(3, 3, 10));
-    MatrixCRS<int> mat2 = MatrixCRS<int>::from_dense(Matrix<int>(3, 3, 3));
-    MatrixCRS<int> mat3 = MatrixCRS<int>::from_dense(Matrix<int>(3, 4, -2));
+    MatrixCRS<int> mat1 = MatrixCRS<int>(Matrix<int>(3, 3, 10));
+    MatrixCRS<int> mat2 = MatrixCRS<int>(Matrix<int>(3, 3, 3));
+    MatrixCRS<int> mat3 = MatrixCRS<int>(Matrix<int>(3, 4, -2));
 
     mat1 += mat2;
 
@@ -130,9 +130,9 @@ TEST_CASE("Matrix Manipulation 5", "[matrix_man_5]") {
 }
 
 TEST_CASE("Matrix Manipulation 6", "[matrix_man_6]") {
-    MatrixCRS<int> mat1 = MatrixCRS<int>::from_dense(Matrix<int>(3, 3, std::vector<int>{10, 20, -30, 40, 50}));
-    MatrixCRS<int> mat2 = MatrixCRS<int>::from_dense(Matrix<int>(3, 3, std::vector<int>{0, 0, 20, 10, 0, 0, 0}));
-    MatrixCRS<int> mat3 = MatrixCRS<int>::from_dense(Matrix<int>(3, 4, -2));
+    MatrixCRS<int> mat1 = MatrixCRS<int>(Matrix<int>(3, 3, std::vector<int>{10, 20, -30, 40, 50}));
+    MatrixCRS<int> mat2 = MatrixCRS<int>(Matrix<int>(3, 3, std::vector<int>{0, 0, 20, 10, 0, 0, 0}));
+    MatrixCRS<int> mat3 = MatrixCRS<int>(Matrix<int>(3, 4, -2));
 
     mat1 += mat2;
 

@@ -46,7 +46,7 @@ TEST_CASE("Sparse Matrix get and set 2", "[sparse_matrix_get_set_2_legacy]") {
     mat.set(2, 0, 3);
     mat.set(2, 1, 4);
 
-    MatrixCRS<int> crs = MatrixCRS<int>::from_dense(mat);
+    MatrixCRS<int> crs = MatrixCRS<int>(mat);
 
     crs.set(1, 1, 42);
     crs.set(2, 1, 0);
@@ -67,7 +67,7 @@ TEST_CASE("Sparsen Matrix from Dense Matrix 1", "[spase_from_dense_matrix_1_lega
     mat.set(2, 0, 3);
     mat.set(2, 1, 4);
 
-    MatrixCRS<int> crs = MatrixCRS<int>::from_dense(mat);
+    MatrixCRS<int> crs = MatrixCRS<int>(mat);
 
     REQUIRE(crs.get(0, 0) == 1);
     REQUIRE(crs.get(0, 2) == 2);
