@@ -35,7 +35,8 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    Matrix<_T>::Matrix(size_t rows, size_t cols, _T val) : MatrixBase<_T>(rows, cols) {
+    Matrix<_T>::Matrix(size_t rows, size_t cols, _T val)
+        : MatrixBase<_T>(rows, cols) {
         data = std::shared_ptr<_T[]>(new _T[rows * cols]);
         for (size_t i = 0; i < rows * cols; i++) {
             data[i] = val;
@@ -45,7 +46,8 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    Matrix<_T>::Matrix(size_t rows, size_t cols, std::vector<_T> vals) : MatrixBase<_T>(rows, cols) {
+    Matrix<_T>::Matrix(size_t rows, size_t cols, std::vector<_T> vals)
+        : MatrixBase<_T>(rows, cols) {
         size_t n_vals = vals.size();
 
         data = std::shared_ptr<_T[]>(new _T[rows * cols]);
@@ -60,6 +62,15 @@ namespace fin_diff {
         std::cout << rows << "x" << cols << " Matrix Created" << std::endl;
     }
 
+    template <typename _T>
+    Matrix<_T>::Matrix(const Matrix<_T>& o)
+        : MatrixBase<_T>(o.get_n_rows(), o.get_n_cols()) {
+        data = std::shared_ptr<_T[]>(new _T[o.get_n_rows() * o.get_n_cols()]);
+        for (size_t i = 0; i < o.get_n_rows() * o.get_n_cols(); i++) {
+            data[i] = o.data[i];
+        }
+    }
+
     // MatrixCRS class implementation
     template <typename _T>
     MatrixCRS<_T>::MatrixCRS() : MatrixBase<_T>(0, 0) {
@@ -72,8 +83,51 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    MatrixCRS<_T>::MatrixCRS(size_t rows, size_t cols) : MatrixBase<_T>(rows, cols) {
+    MatrixCRS<_T>::MatrixCRS(size_t rows, size_t cols)
+        : MatrixBase<_T>(rows, cols) {
         this->construct(rows, cols);
+    }
+
+    template <typename _T>
+    MatrixCRS<_T>::MatrixCRS(const Matrix<_T>& o)
+        : MatrixBase<_T>(o.get_n_rows(), o.get_n_cols()) {
+        this->construct(o.get_n_rows(), o.get_n_cols());
+
+        for (size_t i = 0; i < o.get_n_rows(); i++) {
+            bool has_non_zero = false;
+            for (size_t j = 0; j < o.get_n_cols(); j++) {
+                _T val = o.get(i, j);
+                if (val != _T{}) {
+                    this->values.push_back(val);
+                    this->col_indices.push_back(j);
+
+                    if (!has_non_zero) {
+                        has_non_zero = true;
+                        this->row_ptrs[i] = this->values.size() - 1;
+                    }
+                }
+            }
+
+            if (!has_non_zero) {
+                this->row_ptrs[i] = this->values.size();
+            }
+        }
+
+        row_ptrs[o.get_n_rows()] = values.size();
+    }
+
+    template <typename _T>
+    MatrixCRS<_T>::MatrixCRS(const MatrixCRS<_T>& o)
+        : MatrixBase<_T>(o.get_n_rows(), o.get_n_cols()) {
+        this->construct(o.get_n_rows(), o.get_n_cols());
+
+        // Copy the values
+        this->values.assign(o.values.begin(), o.values.end());
+        this->col_indices.assign(o.col_indices.begin(), o.col_indices.end());
+
+        for (size_t i = 0; i <= this->rows; i++) {
+            this->row_ptrs[i] = o.row_ptrs[i];
+        }
     }
 
     template <typename _T>
@@ -140,34 +194,34 @@ namespace fin_diff {
         }
     }
 
-    template <typename _T>
-    MatrixCRS<_T> MatrixCRS<_T>::from_dense(const Matrix<_T>& mat) {
-        MatrixCRS<_T> crs(mat.get_n_rows(), mat.get_n_cols());
+    // template <typename _T>
+    // MatrixCRS<_T> MatrixCRS<_T>::from_dense(const Matrix<_T>& mat) {
+    //     MatrixCRS<_T> crs(mat.get_n_rows(), mat.get_n_cols());
 
-        for (size_t i = 0; i < mat.get_n_rows(); i++) {
-            bool has_non_zero = false;
-            for (size_t j = 0; j < mat.get_n_cols(); j++) {
-                _T val = mat.get(i, j);
-                if (val != _T{}) {
-                    crs.values.push_back(val);
-                    crs.col_indices.push_back(j);
+    //     for (size_t i = 0; i < mat.get_n_rows(); i++) {
+    //         bool has_non_zero = false;
+    //         for (size_t j = 0; j < mat.get_n_cols(); j++) {
+    //             _T val = mat.get(i, j);
+    //             if (val != _T{}) {
+    //                 crs.values.push_back(val);
+    //                 crs.col_indices.push_back(j);
 
-                    if (!has_non_zero) {
-                        has_non_zero = true;
-                        crs.row_ptrs[i] = crs.values.size() - 1;
-                    }
-                }
-            }
+    //                 if (!has_non_zero) {
+    //                     has_non_zero = true;
+    //                     crs.row_ptrs[i] = crs.values.size() - 1;
+    //                 }
+    //             }
+    //         }
 
-            if (!has_non_zero) {
-                crs.row_ptrs[i] = crs.values.size();
-            }
-        }
+    //         if (!has_non_zero) {
+    //             crs.row_ptrs[i] = crs.values.size();
+    //         }
+    //     }
 
-        crs.row_ptrs[crs.get_n_rows()] = crs.values.size();
+    //     crs.row_ptrs[crs.get_n_rows()] = crs.values.size();
 
-        return crs;
-    }
+    //     return crs;
+    // }
 
     template <typename _T>
     void MatrixCRS<_T>::print() const {
@@ -239,7 +293,8 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    MatrixDiagonal<_T>::MatrixDiagonal(size_t n, _T val) : MatrixBase<_T>(n, n) {
+    MatrixDiagonal<_T>::MatrixDiagonal(size_t n, _T val)
+        : MatrixBase<_T>(n, n) {
         data = std::shared_ptr<_T[]>(new _T[n]);
         for (size_t i = 0; i < n; i++) {
             data[i] = val;
@@ -249,7 +304,8 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    MatrixDiagonal<_T>::MatrixDiagonal(size_t n, std::vector<_T> vals) : MatrixBase<_T>(n, n) {
+    MatrixDiagonal<_T>::MatrixDiagonal(size_t n, std::vector<_T> vals)
+        : MatrixBase<_T>(n, n) {
         size_t n_vals = vals.size();
 
         data = std::shared_ptr<_T[]>(new _T[n]);
@@ -265,12 +321,35 @@ namespace fin_diff {
     }
 
     template <typename _T>
-    void MatrixDiagonal<_T>::diagonal_validate(size_t i, size_t j) const {
-        this->validate();
-
-        if (i != j) {
-            throw std::invalid_argument("Matrix is a diagonal matrix");
+    MatrixDiagonal<_T>::MatrixDiagonal(const MatrixBase<_T>& o)
+        : MatrixBase<_T>(o.get_n_rows(), o.get_n_cols()) {
+        data = std::shared_ptr<_T[]>(new _T[o.get_n_rows()]);
+        for (size_t i = 0; i < o.get_n_rows(); i++) {
+            data[i] = o.get(i, i);
         }
     }
 
+    template <typename _T>
+    MatrixDiagonal<_T>::MatrixDiagonal(const MatrixDiagonal<_T>& o)
+        : MatrixBase<_T>(o.get_n_rows(), o.get_n_cols()),
+          data(new _T[o.get_n_rows()]) {
+        for (size_t i = 0; i < o.get_n_rows(); i++) {
+            data[i] = o.data[i];
+        }
+    }
+
+    template <typename _T>
+    MatrixDiagonal<_T>& MatrixDiagonal<_T>::operator=(
+        const MatrixDiagonal<_T>& o) {
+        if (this != &o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+            for (size_t i = 0; i < o.get_n_rows(); i++) {
+                data[i] = o.data[i];
+            }
+        }
+        return *this;
+    }
 }  // namespace fin_diff

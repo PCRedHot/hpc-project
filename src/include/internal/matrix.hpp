@@ -7,8 +7,20 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <sstream>
+#include <cmath>
 
 namespace fin_diff {
+
+    // Forward declaration
+    template <typename _T>
+    class Matrix;
+
+    template <typename _T>
+    class MatrixCRS;
+
+    template <typename _T>
+    class MatrixDiagonal;
 
     template <typename _T>
     class MatrixBase {
@@ -24,21 +36,88 @@ namespace fin_diff {
 
         template <typename _T2>
         MatrixBase<_T>& operator+=(MatrixBase<_T2> o) {
-            if (this->get_n_rows() != o.get_n_rows() || this->get_n_cols() != o.get_n_cols()) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
                 throw std::invalid_argument("Matrix dimensions do not match");
             }
 
             for (int i = 0; i < this->get_n_cols() * this->get_n_rows(); i++) {
-                this->set(i / this->get_n_cols(), i % this->get_n_cols(), this->get(i / this->get_n_cols(), i % this->get_n_cols()) + o.get(i / this->get_n_cols(), i % this->get_n_cols()));
+                this->set(
+                    i / this->get_n_cols(), i % this->get_n_cols(),
+                    this->get(i / this->get_n_cols(), i % this->get_n_cols()) +
+                        o.get(i / this->get_n_cols(), i % this->get_n_cols()));
             }
 
             return *this;
         }
 
-        // template <typename _T2>
-        // virtual std::unique_ptr<MatrixBase<_T>> operator*(const MatrixBase<_T2>& o) const;
+        template <typename _T2>
+        Matrix<_T> operator+(const MatrixBase<_T2>& o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
 
-        virtual void print() const = 0;
+            Matrix<_T> res(this->get_n_rows(), this->get_n_cols());
+
+            for (size_t i = 0; i < this->get_n_rows(); i++) {
+                for (size_t j = 0; j < this->get_n_cols(); j++) {
+                    res(i, j) = this->get(i, j) + o.get(i, j);
+                }
+            }
+
+            return res;
+        }
+
+        template <typename _T2>
+        Matrix<_T> operator-(const MatrixBase<_T2>& o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+
+            Matrix<_T> res(this->get_n_rows(), this->get_n_cols());
+
+            for (size_t i = 0; i < this->get_n_rows(); i++) {
+                for (size_t j = 0; j < this->get_n_cols(); j++) {
+                    res(i, j) = this->get(i, j) - o.get(i, j);
+                }
+            }
+
+            return res;
+        }
+
+        template <typename _T2>
+        Matrix<_T> operator*(const MatrixBase<_T2>& o) {
+            this->validate_matrix_mul(o);
+
+            size_t n_rows = this->get_n_rows();
+            size_t n_cols = o.get_n_cols();
+            size_t n_inner = this->get_n_cols();
+
+            Matrix<_T> res(n_rows, n_cols);
+
+            for (size_t i = 0; i < n_rows; i++) {
+                for (size_t j = 0; j < n_cols; j++) {
+                    _T sum = 0;
+                    for (size_t k = 0; k < n_inner; k++) {
+                        sum += this->get(i, k) * o.get(k, j);
+                    }
+                    res(i, j) = sum;
+                }
+            }
+
+            return res;
+        }
+
+        void print() const {
+        for (size_t i = 0; i < this->rows; ++i) {
+            for (size_t j = 0; j < this->cols; ++j) {
+                std::cout << get(i, j) << " ";
+            }
+            std::cout << std::endl;
+        }
+    };
 
        protected:
         size_t rows, cols;
@@ -66,6 +145,8 @@ namespace fin_diff {
         Matrix(size_t rows, size_t cols);
         Matrix(size_t rows, size_t cols, _T val);
         Matrix(size_t rows, size_t cols, std::vector<_T> vals);
+
+        Matrix(const Matrix<_T>& o);
 
         _T get(size_t i, size_t j) const override { return (*this)(i, j); }
         void set(size_t i, size_t j, _T val) override { (*this)(i, j) = val; }
@@ -113,8 +194,9 @@ namespace fin_diff {
         }
 
         template <typename _T2>
-        Matrix<_T>& operator+=(Matrix<_T2> o) {
-            if (this->get_n_rows() != o.get_n_rows() || this->get_n_cols() != o.get_n_cols()) {
+        Matrix<_T>& operator+=(const Matrix<_T2>& o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
                 throw std::invalid_argument("Matrix dimensions do not match");
             }
 
@@ -126,7 +208,7 @@ namespace fin_diff {
         }
 
         template <typename _T2>
-        Matrix<_T>& operator*(MatrixBase<_T2> o) {
+        Matrix<_T> operator*(const MatrixBase<_T2>& o) {
             this->validate_matrix_mul(o);
 
             size_t n_rows = this->get_n_rows();
@@ -148,13 +230,41 @@ namespace fin_diff {
             return res;
         }
 
+        double norm() const {
+            if (this->get_n_rows() != 1 && this->get_n_cols() != 1) {
+                throw std::invalid_argument(
+                    "Norm can only be calculated for vectors (1D matrices)");
+            }
+
+            double sum = 0;
+            for (int i = 0; i < this->get_n_cols() * this->get_n_rows(); i++) {
+                sum += data[i] * data[i];
+            }
+
+            return std::sqrt(sum);
+        }
+
+        std::vector<_T> to_vector() const {
+            if (this->get_n_cols() != 1 && this->get_n_rows() != 1) {
+                throw std::invalid_argument(
+                    "Matrix cannot be converted to a vector");
+            }
+
+            std::vector<_T> vec(this->get_n_cols() * this->get_n_rows());
+            for (int i = 0; i < this->get_n_cols() * this->get_n_rows(); i++) {
+                vec[i] = data[i];
+            }
+
+            return vec;
+        }
+
         void clear() {
             for (int i = 0; i < this->get_n_cols() * this->get_n_rows(); i++) {
                 data[i] = _T{};
             }
         };
 
-        void print() const override;
+        void print() const;
 
        private:
         std::shared_ptr<_T[]> data;
@@ -166,8 +276,12 @@ namespace fin_diff {
         MatrixCRS();
         MatrixCRS(size_t n);
         MatrixCRS(size_t rows, size_t cols);
+        MatrixCRS(const Matrix<_T>& o);
+        MatrixCRS(const MatrixCRS<_T>& o);
 
         void construct(size_t rows, size_t cols);
+
+        // static MatrixCRS<_T> from_dense(const Matrix<_T>& mat);
 
         _T get(size_t i, size_t j) const override { return (*this)(i, j); }
         void set(size_t i, size_t j, _T val) override { (*this)(i, j) = val; }
@@ -178,9 +292,7 @@ namespace fin_diff {
             Proxy(MatrixCRS<_T>& matrix, size_t row, size_t col)
                 : matrix(matrix), row(row), col(col) {}
 
-            operator _T() const {
-                return matrix._unsave_get(row, col);
-            }
+            operator _T() const { return matrix._unsave_get(row, col); }
 
             Proxy& operator=(_T val) {
                 matrix._unsave_set(row, col, val);
@@ -222,7 +334,8 @@ namespace fin_diff {
 
         template <typename _T2>
         MatrixCRS<_T>& operator+=(MatrixCRS<_T2> o) {
-            if (this->get_n_rows() != o.get_n_rows() || this->get_n_cols() != o.get_n_cols()) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
                 throw std::invalid_argument("Matrix dimensions do not match");
             }
 
@@ -244,7 +357,80 @@ namespace fin_diff {
         }
 
         template <typename _T2>
-        MatrixCRS<_T>& operator*(MatrixBase<_T2> o) {
+        MatrixCRS<_T>& operator+=(Matrix<_T2> o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+
+            for (size_t i = 0; i < o.get_n_rows(); i++) {
+                for (size_t j = 0; j < o.get_n_cols(); j++) {
+                    _T val = o.get(i, j);
+                    if (val != _T{}) {
+                        size_t index = this->_find(i, j);
+                        _T this_val = index != -1 ? this->values[index] : 0.0;
+                        this->_unsave_set(i, j, index, this_val + val);
+                    }
+                }
+            }
+
+            return *this;
+        }
+
+        template <typename _T2>
+        MatrixCRS<_T>& operator+=(const MatrixDiagonal<_T2> o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+
+            for (size_t i = 0; i < o.get_n_rows(); i++) {
+                size_t index = this->_find(i, i);
+                _T val = index != -1 ? this->values[index] : 0.0;
+                this->_unsave_set(i, i, index, val + o(i, i));
+            }
+
+            return *this;
+        }
+
+        template <typename _T2>
+        MatrixCRS<_T> operator-(const MatrixDiagonal<_T2> o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+
+            MatrixCRS<_T> res(*this);
+
+            for (size_t i = 0; i < this->get_n_rows(); i++) {
+                size_t index = res._find(i, i);
+                _T val = index != -1 ? res.values[index] : 0.0;
+                res._unsave_set(i, i, index, val - o(i, i));
+            }
+
+            return res;
+        }
+
+        template <typename _T2>
+        Matrix<_T> operator-(const MatrixBase<_T2>& o) {
+            if (this->get_n_rows() != o.get_n_rows() ||
+                this->get_n_cols() != o.get_n_cols()) {
+                throw std::invalid_argument("Matrix dimensions do not match");
+            }
+
+            Matrix<_T> res(this->get_n_rows(), this->get_n_cols());
+
+            for (size_t i = 0; i < this->get_n_rows(); i++) {
+                for (size_t j = 0; j < this->get_n_cols(); j++) {
+                    res(i, j) = this->get(i, j) - o.get(i, j);
+                }
+            }
+
+            return res;
+        }
+
+        template <typename _T2>
+        MatrixCRS<_T> operator*(const MatrixBase<_T2>& o) {
             this->validate_matrix_mul(o);
 
             size_t n_rows = this->get_n_rows();
@@ -274,9 +460,7 @@ namespace fin_diff {
             }
         }
 
-        static MatrixCRS<_T> from_dense(const Matrix<_T>& mat);
-
-        void print() const override;
+        void print() const;
 
        private:
         std::vector<_T> values;
@@ -298,21 +482,42 @@ namespace fin_diff {
         MatrixDiagonal(size_t n);
         MatrixDiagonal(size_t n, _T val);
         MatrixDiagonal(size_t n, std::vector<_T> vals);
+        MatrixDiagonal(const MatrixBase<_T>& o);
+        MatrixDiagonal(const MatrixDiagonal<_T>& o);
+        MatrixDiagonal<_T>& operator=(const MatrixDiagonal<_T>& o);
 
-        _T get(size_t i, size_t j) const override { return this(i, j); };
-        void set(size_t i, size_t j, _T val) override { this(i, j) = val; };
+        _T get(size_t i, size_t j) const override {
+            this->validate(i, j);
 
-        // Overload the operator() for two-dimensional access
-        _T& operator()(size_t row, size_t col) {
-            this->diagonal_validate(row, col);
+            if (i != j) {
+                return _T{};
+            }
 
-            return data[row];
+            return data[i];
         }
 
-        const _T& operator()(size_t row, size_t col) const {
-            this->diagonal_validate(row, col);
+        void set(size_t i, size_t j, _T val) override {
+            this->diagonal_validate(i, j);
 
-            return data[row];
+            data[i] = val;
+        }
+
+        // Overload the operator() for two-dimensional access
+        _T& operator()(size_t i, size_t j) {
+            this->diagonal_validate(i, j);
+
+            return data[i];
+
+        }
+
+        const _T operator()(size_t i, size_t j) const {
+            this->validate(i, j);
+
+            if (i != j) {
+                return _T{};
+            }
+
+            return data[i];
         }
 
         MatrixDiagonal<_T>& operator+=(_T val) {
@@ -361,34 +566,43 @@ namespace fin_diff {
         }
 
         template <typename _T2>
-        MatrixDiagonal<_T>& operator*(MatrixBase<_T2> o) {
+        Matrix<_T> operator*(const MatrixBase<_T2>& o) {
             this->validate_matrix_mul(o);
 
             size_t n_rows = this->get_n_rows();
+            size_t n_cols = o.get_n_cols();
 
-            MatrixDiagonal<_T> res(n_rows);
+            Matrix<_T> res(n_rows, n_cols);
 
             for (size_t i = 0; i < n_rows; i++) {
-                res(i, i) = this->get(i, i) * o.get(i, i);
+                for (size_t j = 0; j < n_cols; j++) {
+                    res(i, j) = this->get(i, i) * o.get(i, j);
+                }
             }
 
             return res;
+        }
+
+        void inv() {
+            for (int i = 0; i < this->get_n_cols(); i++) {
+                data[i] = 1 / data[i];
+            }
         }
 
         void clear() {
             for (int i = 0; i < this->get_n_cols(); i++) {
                 data[i] = _T{};
             }
-        };
-
-        void print() const override;
+        }
 
        private:
         std::shared_ptr<_T[]> data;
 
         void diagonal_validate(size_t i, size_t j) const {
-            this->validate();
-            throw std::invalid_argument("Matrix is a diagonal matrix");
+            this->validate(i, j);
+            if (i != j) {
+                throw std::invalid_argument("Matrix is a diagonal matrix");
+            }
         }
     };
 }  // namespace fin_diff
