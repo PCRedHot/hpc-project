@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include "catch2/catch_all.hpp"
 
 #include "mesh2d.hpp"
@@ -60,6 +61,9 @@ TEST_CASE("RectMesh2D Creation test 2", "[rect_mesh2d_2]") {
     double dx = 1.0 / (Nx - 1);
     double dy = 1.0 / (Ny - 1);
 
+    REQUIRE(mesh.get_dx() == dx);
+    REQUIRE(mesh.get_dy() == dy);
+
     const auto &coords = mesh.get_coordinates();
 
     REQUIRE(coords.size() == 8);
@@ -70,11 +74,11 @@ TEST_CASE("RectMesh2D Creation test 2", "[rect_mesh2d_2]") {
     const auto &lines = mesh.get_lines();
     REQUIRE(lines.size() == 10);    
 
+    // Check if boundary points are is_boundary
+    for (int i = 0; i < 8; i++) {
+        CHECK(mesh.is_boundary(i) == (i % Nx == 0 || i % Nx == Nx - 1 || i / Nx == 0 || i / Nx == Ny - 1));
+    }
+    
     mesh.write_to_vtk("test_mesh[rect_mesh2d_2].vtk");
 
-    // UNSCOPED_INFO("Test case start");
-    // for (const auto& conn : lines) {
-    //     UNSCOPED_INFO(conn.first << ", " << conn.second);
-    // }
-    // CHECK(false);
 }

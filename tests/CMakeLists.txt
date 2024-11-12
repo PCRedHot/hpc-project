@@ -13,6 +13,10 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(tests
     test_mesh2d.cpp
     test_matrix.cpp
+    test_matrix_legacy.cpp
+    test_discrete_2d.cpp
+    test_exprtk.cpp
+    # test_utils.cpp
 )
 
 # Link the Catch2 library and your static library to the test executable
