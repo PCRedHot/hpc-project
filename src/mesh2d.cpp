@@ -1,8 +1,10 @@
 #include "mesh2d.hpp"
 
 #include <cmath>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 namespace fin_diff {
 
@@ -12,13 +14,42 @@ Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& coordinates,
       N_el(lines.size()),
       coordinates(coordinates),
       lines(lines) {
+    
+    // Count number of lines connected to each point
+    std::unordered_map<size_t, size_t> line_count;
+
     for (const auto& line : lines) {
-        double dx =
-            coordinates[line.second].first - coordinates[line.first].first;
-        double dy =
-            coordinates[line.second].second - coordinates[line.first].second;
-        line_distance.push_back(std::sqrt(dx * dx + dy * dy));
+        size_t point1 = line.first;
+        size_t point2 = line.second;
+
+        line_count[point1]++;
+        line_count[point2]++;
     }
+
+    // Set boundary if point is connected to 3 or less lines
+    boundary.reserve(N_pt);
+    for (size_t i = 0; i < N_pt; i++) {
+        bool is_boundary_pt = line_count[i] <= 3;
+        boundary.push_back(is_boundary_pt);
+
+        if (is_boundary_pt) {
+            num_boundary_points++;
+        }
+    }
+
+    std::cout << "Mesh2D Created" << std::endl;
+}
+
+Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& coordinates,
+               const std::vector<std::pair<size_t, size_t>>& lines,
+               const std::vector<bool>& boundary)
+    : N_pt(coordinates.size()),
+      N_el(lines.size()),
+      coordinates(coordinates),
+      lines(lines),
+      boundary(boundary) {
+    
+    num_boundary_points = std::count(boundary.begin(), boundary.end(), true);
     std::cout << "Mesh2D Created" << std::endl;
 }
 
@@ -39,10 +70,6 @@ const std::vector<std::pair<size_t, size_t>>& Mesh2D::get_lines() const {
 // const std::vector<std::pair<size_t, size_t>>& Mesh2D::get_faces() const {
 //     return faces;
 // }
-
-const std::vector<double>& Mesh2D::get_line_distance() const {
-    return line_distance;
-}
 
 void Mesh2D::write_to_vtk(const std::string& filename) const {
     std::ofstream file(filename);
@@ -79,15 +106,26 @@ void Mesh2D::write_to_vtk(const std::string& filename) const {
 RectMesh2D::RectMesh2D(size_t Nx, size_t Ny)
     : Mesh2D(generate_coordinates(Nx, Ny), generate_lines(Nx, Ny)),
       Nx(Nx),
-      Ny(Ny) {
+      Ny(Ny),
+      dx(1.0 / (Nx - 1)),
+      dy(1.0 / (Ny - 1)) {
+    this->boundary.reserve(Nx * Ny);
+    for (size_t i = 0; i < Nx * Ny; i++) {
+        bool is_boundary_pt = (i / Nx == 0 || i % Nx == 0 || i % Nx == Nx - 1 ||
+                           i / Nx == Ny - 1);
+        this->boundary.push_back(is_boundary_pt);
+
+        if (is_boundary_pt) {
+            num_boundary_points++;
+        }
+    }
+    
+    
+
     std::cout << "RectMesh2D Created" << std::endl;
 }
 
 RectMesh2D::~RectMesh2D() { std::cout << "RectMesh2D Deleted" << std::endl; }
-
-size_t RectMesh2D::get_Nx() const { return Nx; }
-
-size_t RectMesh2D::get_Ny() const { return Ny; }
 
 const std::vector<std::pair<double, double>>& RectMesh2D::get_coordinates()
     const {
