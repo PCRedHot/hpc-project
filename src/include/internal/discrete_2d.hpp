@@ -75,6 +75,4 @@ namespace fin_diff {
 
 }  // namespace fin_diff
 
-#include "discrete_2d.tpp"
-
 #endif

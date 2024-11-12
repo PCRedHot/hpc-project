@@ -2,8 +2,8 @@
 #include <vector>
 #include <functional>
 
-#include "discrete_2d.hpp"
 #include "matrix.hpp"
+#include "discrete_2d.hpp"
 #include "mesh2d.hpp"
 #include "exprtk.hpp"
 
@@ -199,14 +199,17 @@ namespace fin_diff {
                 // Apply Dirichlet BCs
                 for (auto val : dirichlet_bcs_val) {
                     rhs(i, 0) += val;
+                    std::cout << "Point " << i << " (" << x << ", " << y << "): Add val " << val << std::endl;
                 }
 
                 for (auto func : dirichlet_bcs_func) {
                     rhs(i, 0) += func(x, y);
+                    std::cout << "Point " << i << " (" << x << ", " << y << "): Add func val " << func(x, y) << std::endl;
                 }
 
                 for (auto expr : dirichlet_bcs_expr_parsed) {
                     rhs(i, 0) += expr.value();
+                    std::cout << "Point " << i << " (" << x << ", " << y << "): Add expr val " << expr.value() << std::endl;
                 }
             } else {
                 // Apply forcing terms
