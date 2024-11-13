@@ -215,3 +215,42 @@ TEST_CASE("Test Problem 3 - expr", "[test_problem_3_expr]") {
     std::cout << std::endl;
 }
 
+TEST_CASE("Test Problem 3 - heavy", "[test_problem_3_heavy]") {
+    // Define the problem
+    // auto f = "3 / 2 * sin(2 * x) * sinh(y)";
+    // auto g = "1 / 2 * sin(2 * x) * sinh(y)";
+
+    auto f = [](double x, double y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    auto g = [](double x, double y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+
+
+    // Define the mesh
+    int Nx = 20;
+    int Ny = 20;
+    RectMesh2D mesh(Nx, Ny);
+
+    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+
+    // Define the discretisation
+    Discretisation2D disc(&mesh);
+
+    disc.add_forcing_term(f);
+    disc.add_dirichlet_bc(g);
+
+    // Define the solver
+    JacobiSolver solver(&disc);
+    SolverConfig config;
+    config.set_max_iter(1000);
+    config.set_convergence_tol(1e-6);
+    solver.set_config(config);
+
+    // Solve the problem
+    auto u = solver.solve();
+
+    std::cout << "u: " << std::endl;
+    for (size_t i = 0; i < u.size(); i++) {
+        std::cout << u[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
