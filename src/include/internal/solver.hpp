@@ -33,7 +33,7 @@ namespace fin_diff {
             auto A = disc->get_lhs();
             auto b = disc->get_rhs();
 
-#ifdef DEBUG
+#ifdef __DEBUG__
             std::cout << "A: " << std::endl;
             A.print();
 
@@ -43,7 +43,7 @@ namespace fin_diff {
 
             MatrixDiagonal<double> D = MatrixDiagonal<double>(A);
 
-#ifdef DEBUG
+#ifdef __DEBUG__
             std::cout << "D_before: " << std::endl;
             D.print();
 #endif
@@ -84,7 +84,7 @@ namespace fin_diff {
                 // Calculate the norm of the residual
                 curr_tol = residual.norm() / residual.get_n_rows();
 
-#ifdef DEBUG
+#ifdef __DEBUG__
                 std::cout << "Iteration: " << n_iter
                           << ", Residual: " << curr_tol << std::endl;
 #endif

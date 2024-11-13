@@ -288,8 +288,9 @@ namespace fin_diff {
         for (size_t i = 0; i < n; i++) {
             data[i] = _T{};
         }
-
+#ifdef __DEBUG__
         std::cout << n << "x" << n << " Diagonal Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
@@ -299,8 +300,9 @@ namespace fin_diff {
         for (size_t i = 0; i < n; i++) {
             data[i] = val;
         }
-
+#ifdef __DEBUG__
         std::cout << n << "x" << n << " Diagonal Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
@@ -316,8 +318,9 @@ namespace fin_diff {
                 data[i] = _T{};
             }
         }
-
+#ifdef __DEBUG__
         std::cout << n << "x" << n << " Diagonal Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
