@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Debug mode
 if (CMAKE_BUILD_TYPE MATCHES Debug)
+    message(STATUS "MATCHES Debug")
     add_definitions(-D__DEBUG__)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

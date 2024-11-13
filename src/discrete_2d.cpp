@@ -1,24 +1,34 @@
 
-#include <vector>
-#include <functional>
-
-#include "matrix.hpp"
 #include "discrete_2d.hpp"
-#include "mesh2d.hpp"
+
+#include <functional>
+#include <vector>
+
 #include "exprtk.hpp"
+#include "matrix.hpp"
+#include "mesh2d.hpp"
 
 namespace fin_diff {
 
-
-    Discretisation2D::Discretisation2D(const RectMesh2D* mesh) : mesh(mesh), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {
+    Discretisation2D::Discretisation2D(RectMesh2D *m) : Discretisation(m) {
         _calculate_lhs();
+#ifdef __DEBUG__
         std::cout << "Discretisation2D Created" << std::endl;
+#endif
+    }
+
+    Discretisation2D::Discretisation2D(std::shared_ptr<RectMesh2D> m) : Discretisation(std::move(m)) {
+        _calculate_lhs();
+#ifdef __DEBUG__
+        std::cout << "Discretisation2D Created" << std::endl;
+#endif
     }
 
     Discretisation2D::~Discretisation2D() {
+#ifdef __DEBUG__
         std::cout << "Discretisation2D Deleted" << std::endl;
+#endif
     }
-    
 
     void Discretisation2D::add_forcing_term(double val) {
         this->forcing_terms_val.push_back(val);
@@ -71,11 +81,11 @@ namespace fin_diff {
 
         lhs.clear();
 
-        auto lines = mesh->get_lines();
-        auto coords = mesh->get_coordinates();
+        auto lines = get_mesh().get_lines();
+        auto coords = get_mesh().get_coordinates();
 
-        double dx_sq = mesh->get_dx() * mesh->get_dx();
-        double dy_sq = mesh->get_dy() * mesh->get_dy();
+        double dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
+        double dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
 
         for (int i = 0; i < lines.size(); i++) {
             auto line = lines[i];
@@ -83,24 +93,17 @@ namespace fin_diff {
             size_t p1 = line.first;
             size_t p2 = line.second;
 
-            bool is_boundary_p1 = mesh->is_boundary(p1);
-            bool is_boundary_p2 = mesh->is_boundary(p2);
-            
+            bool is_boundary_p1 = get_mesh().is_boundary(p1);
+            bool is_boundary_p2 = get_mesh().is_boundary(p2);
+
             if (is_boundary_p1 && is_boundary_p2) {
                 // Both points are on the boundary
                 continue;
             }
 
             double d_sq = 0.0;
-            // if (coords[p1].first == coords[p2].first) {
-            //     // Horizontal line
-            //     d_sq = dy_sq;
-            // } else {
-            //     // Vertical line
-            //     d_sq = dx_sq;
-            // }
 
-            if (p2 - p1 == 1) { // p2 is always greater than p1
+            if (p2 - p1 == 1) {  // p2 is always greater than p1
                 // Horizontal line
                 d_sq = dy_sq;
             } else {
@@ -127,8 +130,8 @@ namespace fin_diff {
             }
         }
 
-        auto boundary = mesh->get_boundary();
-        for (int i = 0; i < mesh->get_num_points(); i++) {
+        auto boundary = get_mesh().get_boundary();
+        for (int i = 0; i < get_mesh().get_num_points(); i++) {
             if (boundary[i]) {
                 lhs(i, i) = 1.0;
             }
@@ -137,20 +140,19 @@ namespace fin_diff {
         lhs_ready = true;
     }
 
-
     void Discretisation2D::_calculate_rhs(const bool force) {
         if (!force && rhs_ready) return;
 
         rhs.clear();
 
-        auto lines = mesh->get_lines();
-        auto coords = mesh->get_coordinates();
+        auto lines = get_mesh().get_lines();
+        auto coords = get_mesh().get_coordinates();
 
         // preprocess string expressions
         typedef exprtk::symbol_table<double> symbol_table_t;
         typedef exprtk::expression<double> expression_t;
         typedef exprtk::parser<double> parser_t;
-        
+
         double x, y;
 
         symbol_table_t symbol_table;
@@ -182,34 +184,39 @@ namespace fin_diff {
         }
 
         // Apply forcing terms and set Dirichlet BCs
-        double dx_sq = mesh->get_dx() * mesh->get_dx();
-        double dy_sq = mesh->get_dy() * mesh->get_dy();
+        double dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
+        double dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
 
         double f_mul = dx_sq * dy_sq;
 
+        for (int i = 0; i < get_mesh().get_num_points(); i++) {
+            bool is_boundary = get_mesh().is_boundary(i);
 
-        for (int i = 0; i < mesh->get_num_points(); i++) {
-            bool is_boundary = mesh->is_boundary(i);
-            
-            auto coords = mesh->get_coordinates();
-                x = coords[i].first;
-                y = coords[i].second;
+            auto coords = get_mesh().get_coordinates();
+            x = coords[i].first;
+            y = coords[i].second;
 
             if (is_boundary) {
                 // Apply Dirichlet BCs
                 for (auto val : dirichlet_bcs_val) {
                     rhs(i, 0) += val;
+#ifdef __DEBUG__
                     std::cout << "Point " << i << " (" << x << ", " << y << "): Add val " << val << std::endl;
+#endif
                 }
 
                 for (auto func : dirichlet_bcs_func) {
                     rhs(i, 0) += func(x, y);
+#ifdef __DEBUG__
                     std::cout << "Point " << i << " (" << x << ", " << y << "): Add func val " << func(x, y) << std::endl;
+#endif
                 }
 
                 for (auto expr : dirichlet_bcs_expr_parsed) {
                     rhs(i, 0) += expr.value();
+#ifdef __DEBUG__
                     std::cout << "Point " << i << " (" << x << ", " << y << "): Add expr val " << expr.value() << std::endl;
+#endif
                 }
             } else {
                 // Apply forcing terms
@@ -220,21 +227,20 @@ namespace fin_diff {
                 for (auto func : forcing_terms_func) {
                     rhs(i, 0) += func(x, y) * f_mul;
                 }
-                
+
                 for (auto expr : forcing_terms_expr_parsed) {
                     rhs(i, 0) += expr.value() * f_mul;
                 }
             }
         }
 
-
         // Add Elimated Boundary Point Influences
         for (auto line : lines) {
             size_t p1 = line.first;
             size_t p2 = line.second;
 
-            bool is_boundary_p1 = mesh->is_boundary(p1);
-            bool is_boundary_p2 = mesh->is_boundary(p2);
+            bool is_boundary_p1 = get_mesh().is_boundary(p1);
+            bool is_boundary_p2 = get_mesh().is_boundary(p2);
 
             if (!(is_boundary_p1 ^ is_boundary_p2)) {
                 // Both points are on the boundary or both are not on the boundary
@@ -261,64 +267,4 @@ namespace fin_diff {
 
         rhs_ready = true;
     }
-
-    	
-
-
-    // void Discretisation2D::add_forcing_term(double val) {
-    //     double f_mul = mesh.get_dx() * mesh.get_dx() * mesh.get_dy() * mesh.get_dy() * val;
-
-    //     rhs += f_mul;
-    // }
-
-    // void Discretisation2D::add_forcing_term(const std::function<double(double, double)> &func) {
-    //     std::vector<std::pair<double, double>> coords = mesh.get_coordinates();
-    //     double f_mul = mesh.get_dx() * mesh.get_dx() * mesh.get_dy() * mesh.get_dy();
-
-    //     for (int i = 0; i < coords.size(); i++) {
-    //         rhs(i, 0) = func(coords[i].first, coords[i].second) * f_mul;
-    //     }
-    // }
-
-    // void Discretisation2D::add_dirichlet_bc(double val) {
-    //     std::vector<std::pair<size_t, size_t>> lines = mesh.get_lines();
-    //     std::vector<std::pair<double, double>> coords = mesh.get_coordinates();
-
-    //     double dx_sq = mesh.get_dx() * mesh.get_dx();
-    //     double dy_sq = mesh.get_dy() * mesh.get_dy();
-
-    //     for (int i = 0; i < lines.size(); i++) {
-    //         auto line = lines[i];
-
-    //         size_t p1 = line.first;
-    //         size_t p2 = line.second;
-
-    //         bool is_boundary_p1 = mesh.is_boundary(p1);
-    //         bool is_boundary_p2 = mesh.is_boundary(p2);
-
-    //         if ((is_boundary_p1 && is_boundary_p2) ||
-    //             (!is_boundary_p1 && !is_boundary_p2)) {
-    //             // Both points are on the boundary or both are not on the boundary
-    //             continue;
-    //         }
-
-    //         double d_sq = 0.0;
-    //         if (coords[p1].first == coords[p2].first) {
-    //             // Horizontal line
-    //             d_sq = dy_sq;
-    //         } else {
-    //             // Vertical line
-    //             d_sq = dx_sq;
-    //         }
-
-    //         if (is_boundary_p1) {
-    //             // p2 contribution on p1
-    //             rhs(p1, 0) -= val * d_sq;
-    //         } else {
-    //             // p1 contribution on p2
-    //             rhs(p2, 0) -= val * d_sq;
-    //         }
-    //     }
-    // }
-
 }  // namespace fin_diff

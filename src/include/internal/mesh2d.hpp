@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include "exprtk.hpp"
+
 namespace fin_diff {
 
 class Mesh2D {
@@ -19,8 +21,8 @@ class Mesh2D {
            const std::vector<bool> &boundary);
     virtual ~Mesh2D();
 
-    size_t get_num_points() const;
-    size_t get_num_elements() const;
+    size_t get_num_points() const  { return N_pt; }
+    size_t get_num_elements() const { return N_el; }
 
     std::vector<bool> get_boundary() const { return boundary; }
     bool is_boundary(size_t i) const { return boundary[i]; }
@@ -35,6 +37,11 @@ class Mesh2D {
 
     void write_to_vtk(const std::string &filename) const;
 
+    std::vector<double> get_empty_field() const {
+        return std::vector<double>(N_pt, 0.0);
+    }
+
+    std::vector<double> get_field_from_expr(const std::string &expr) const;
 
    protected:
     size_t N_pt;

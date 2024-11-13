@@ -1,0 +1,25 @@
+# This is a comment
+// This is also a comment. Empty line (below) is ignored
+
+// This is a comment block
+
+// Mesh Setting
+DIMENSION 2     // Dimension of the problem. One of {2}
+NUM_X 5         // Number of nodes in x-direction
+NUM_Y 5         // Number of nodes in y-direction
+# NUM_Z 5       // Number of nodes in z-direction (Only possible when dim is 3)
+
+// Solver Setting
+SOLVER jacobi   // One of {"jacobi"}
+TOLERANCE 1e-6  // Convergence tolerance
+MAX_ITER 100    // Maximum number of iterations
+
+// Equation Setting
+FORCING_TERM 8 * pi^2 * (sin(2 * pi * x) * sin(2 * pi * y))     // Forcing term f(x, y)
+DIRICHLET_BC sin(2 * pi * x) * sin(2 * pi * y)                  // Dirichlet Boundary Condition g(x, y)
+INIT_GUESS 0.0        // u_0 Initial guess value function expression
+
+// Output Setting
+OUTPUT ./output // Output Folder Path
+
+This line should fail the test

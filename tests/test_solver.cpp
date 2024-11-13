@@ -9,8 +9,6 @@
 #include "discrete_2d.hpp"
 #include "mesh2d.hpp"
 
-
-
 using namespace fin_diff;
 
 TEST_CASE("Test Problem 1", "[test_problem_1]") {
@@ -89,7 +87,7 @@ TEST_CASE("Test Problem 2", "[test_problem_2]") {
     solver.set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver.solve(u_init);
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {

@@ -5,13 +5,17 @@
 
 #include "discrete_2d.hpp"
 #include "matrix.hpp"
-
+#include "param.hpp"
 namespace fin_diff {
 
     class SolverConfig {
        public:
         SolverConfig() = default;
         SolverConfig(const SolverConfig& o) = default;
+        SolverConfig(const Parameter& param) {
+            set_convergence_tol(param.get_tolerance());
+            set_max_iter(param.get_max_iter());
+        }
 
         ~SolverConfig() = default;
 

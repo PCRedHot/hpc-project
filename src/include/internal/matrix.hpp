@@ -133,6 +133,7 @@ namespace fin_diff {
 
         void validate_matrix_mul(const MatrixBase<_T>& o) const {
             if (this->get_n_cols() != o.get_n_rows()) {
+                std::cerr << "Matrix dimensions do not match: " << this->get_n_rows() << "x" << this->get_n_cols() << " times " << o.get_n_rows() << "x" << o.get_n_cols() << std::endl;
                 throw std::invalid_argument("Matrix dimensions do not match");
             }
         }

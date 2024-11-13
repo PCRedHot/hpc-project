@@ -21,7 +21,9 @@ namespace fin_diff {
 
     template <typename _T>
     Matrix<_T>::Matrix() : MatrixBase<_T>(0, 0) {
+#ifdef __DEBUG__
         std::cout << "Null Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
@@ -30,8 +32,9 @@ namespace fin_diff {
         for (size_t i = 0; i < rows * cols; i++) {
             data[i] = _T{};
         }
-
+#ifdef __DEBUG__
         std::cout << rows << "x" << cols << " Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
@@ -41,8 +44,9 @@ namespace fin_diff {
         for (size_t i = 0; i < rows * cols; i++) {
             data[i] = val;
         }
-
+#ifdef __DEBUG__
         std::cout << rows << "x" << cols << " Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>
@@ -58,8 +62,9 @@ namespace fin_diff {
                 data[i] = _T{};
             }
         }
-
+#ifdef __DEBUG__
         std::cout << rows << "x" << cols << " Matrix Created" << std::endl;
+#endif
     }
 
     template <typename _T>

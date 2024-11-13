@@ -2,6 +2,7 @@
 #define LHS2D_HPP
 
 #include <functional>
+#include <memory>
 
 #include "matrix.hpp"
 #include "mesh2d.hpp"
@@ -10,15 +11,27 @@ namespace fin_diff {
 
     class Discretisation {
     public:
+        explicit Discretisation(Mesh2D* m) : mesh(std::shared_ptr<Mesh2D>(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
+        explicit Discretisation(std::shared_ptr<Mesh2D> m) : mesh(std::move(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
+
         virtual ~Discretisation() = default;
 
-        virtual MatrixCRS<double> get_lhs() = 0;
-        virtual Matrix<double> get_rhs() = 0;
+        virtual MatrixCRS<double> get_lhs() { return lhs; }
+        virtual Matrix<double> get_rhs() { return rhs; }
+
+        virtual const Mesh2D& get_mesh() const { return *mesh; };
+
+    protected:
+        std::shared_ptr<Mesh2D> mesh;
+
+        MatrixCRS<double> lhs;
+        Matrix<double> rhs;
     };
 
     class Discretisation2D : public Discretisation {
        public:
-        Discretisation2D(const RectMesh2D* mesh);
+        explicit Discretisation2D(RectMesh2D* m);
+        explicit Discretisation2D(std::shared_ptr<RectMesh2D> m);
 
         ~Discretisation2D();
 
@@ -42,12 +55,10 @@ namespace fin_diff {
         void clear_forcing_term();
         void clear_dirichlet_bc();
 
+        const RectMesh2D& get_mesh() const { return static_cast<const RectMesh2D&>(*mesh); }
+
+
        private:
-        const RectMesh2D* mesh;
-
-        MatrixCRS<double> lhs;
-        Matrix<double> rhs;
-
         std::vector<double> forcing_terms_val;
         std::vector<std::function<double(double, double)>> forcing_terms_func;
         std::vector<std::string> forcing_terms_expr;
@@ -58,7 +69,7 @@ namespace fin_diff {
 
         void _calculate() {
             // Check if mesh is set
-            if (mesh->get_Nx() == 0 || mesh->get_Ny() == 0) {
+            if (get_mesh().get_Nx() == 0 || get_mesh().get_Ny() == 0) {
                 throw std::runtime_error("Mesh is not set");
             }
             

@@ -14,9 +14,8 @@ namespace fin_diff {
         Solver() {};
         ~Solver() {};
 
-        virtual std::vector<double> solve(Matrix<double>* init_u = nullptr) {
-            return std::vector<double>();
-        };
+        virtual std::vector<double> solve() = 0;
+        virtual std::vector<double> solve(std::vector<double> init_u) = 0;
 
         void set_config(SolverConfig config) { this->config = config; }
         SolverConfig* get_config() { return &config; }
@@ -29,7 +28,14 @@ namespace fin_diff {
        public:
         JacobiSolver(Discretisation* disc) : disc(disc) {}
 
-        std::vector<double> solve(Matrix<double>* init_u = nullptr) override {
+        std::vector<double> solve() override {
+            Mesh2D mesh = disc->get_mesh();
+
+            std::vector<double> init_u(mesh.get_num_points(), 0.0);
+            return this->solve(init_u);
+        };
+
+        std::vector<double> solve(std::vector<double> init_u) override {
             auto A = disc->get_lhs();
             auto b = disc->get_rhs();
 
@@ -44,7 +50,7 @@ namespace fin_diff {
             MatrixDiagonal<double> D = MatrixDiagonal<double>(A);
 
 #ifdef __DEBUG__
-            std::cout << "D_before: " << std::endl;
+            std::cout << "D: " << std::endl;
             D.print();
 #endif
             MatrixDiagonal<double> D_inv = MatrixDiagonal<double>(D);
@@ -52,8 +58,7 @@ namespace fin_diff {
 
             MatrixCRS<double> LU = A - D;
 
-            Matrix<double> u = init_u ? Matrix<double>(*init_u)
-                                      : Matrix<double>(b.get_n_rows(), 1, 0.0);
+            Matrix<double> u = Matrix<double>(b.get_n_rows(), 1, init_u);
             Matrix<double> u_new = Matrix<double>(u.get_n_rows(), 1);
 
             // Solve the system
@@ -62,16 +67,13 @@ namespace fin_diff {
 
             size_t n_iter = 0;
             double curr_tol = 1e20;
-
-            std::cout << "D_after: " << std::endl;
-            D.print();
-
+#ifdef __DEBUG__
             std::cout << "D_inv: " << std::endl;
             D_inv.print();
 
             std::cout << "LU: " << std::endl;
             LU.print();
-
+#endif
             while (n_iter < max_iter && curr_tol > tol) {
                 u_new = D_inv * (b - LU * u);
 
