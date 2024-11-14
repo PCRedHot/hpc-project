@@ -21,7 +21,7 @@
 #define _PARAM_FORCING_TERM_KEY "FORCING_TERM"
 #define _PARAM_DIRICHLET_BC_KEY "DIRICHLET_BC"
 #define _PARAM_INIT_GUESS_KEY "INIT_GUESS"
-#define _PARAM_OUTPUT_FOLDER_KEY "OUTPUT"
+#define _PARAM_OUTPUT_FILE_KEY "OUTPUT"
 
 using namespace fin_diff;
 
@@ -47,7 +47,7 @@ namespace fin_diff {
             max_iter = parser.get_max_iter();
             init_guess_expr = parser.get_init_guess_func_expr();
 
-            output_folder = parser.get_output_folder();
+            output_file = parser.get_output_file();
 
             check_valid();
         }
@@ -127,8 +127,8 @@ namespace fin_diff {
                         forcing_term_expr = value;
                     else if (key == _PARAM_DIRICHLET_BC_KEY)
                         dirichlet_bc_expr = value;
-                    else if (key == _PARAM_OUTPUT_FOLDER_KEY)
-                        output_folder = value;
+                    else if (key == _PARAM_OUTPUT_FILE_KEY)
+                        output_file = value;
                     else {
                         std::cerr << "Error: Invalid key in parameter file" << std::endl;
                         throw std::invalid_argument("Invalid key in parameter file");
@@ -162,7 +162,7 @@ namespace fin_diff {
         std::string get_init_guess_expr() const { return init_guess_expr; }
         std::string get_forcing_term_expr() const { return forcing_term_expr; }
         std::string get_dirichlet_bc_expr() const { return dirichlet_bc_expr; }
-        std::string get_output_folder() const { return output_folder; }
+        std::string get_output_file() const { return output_file; }
 
         void print() const {
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Parameter") << "| " << std::setw(_PARAM_PRINT_VAL_WIDTH) << centered("Value") << std::endl;
@@ -178,7 +178,7 @@ namespace fin_diff {
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Initial guess") << "| " << init_guess_expr << std::endl;
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Forcing term") << "| " << forcing_term_expr << std::endl;
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Dirichlet BC") << "| " << dirichlet_bc_expr << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Output folder") << "| " << output_folder << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Output file") << "| " << output_file << std::endl;
         }
 
        private:
@@ -194,7 +194,7 @@ namespace fin_diff {
         std::string forcing_term_expr;
         std::string dirichlet_bc_expr;
 
-        std::string output_folder;
+        std::string output_file;
 
         void check_valid() {
             // Check if the dimension is valid
@@ -227,7 +227,7 @@ namespace fin_diff {
             }
 
             // Check if the output folder is valid
-            if (output_folder.empty()) {
+            if (output_file.empty()) {
                 std::cerr << "Error: Empty output folder" << std::endl;
                 throw std::invalid_argument("Empty output folder");
             }

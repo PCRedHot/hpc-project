@@ -58,7 +58,7 @@ namespace fin_diff {
                 .default_value(std::string("0.0"));
 
             parser.add_argument("-o", "--output")
-                .help("Output folder")
+                .help("Output file path")
                 .default_value(std::string("./output"));
                 
             try {
@@ -82,7 +82,7 @@ namespace fin_diff {
         std::string get_init_guess_func_expr() { return parser.get<std::string>("--init-guess"); }
         std::string get_forcing_term_func_expr() { return parser.get<std::string>("--forcing-term"); }
         std::string get_dirichlet_bc_func_expr() { return parser.get<std::string>("--dirichlet-bc"); }
-        std::string get_output_folder() { return parser.get<std::string>("--output"); }
+        std::string get_output_file() { return parser.get<std::string>("--output"); }
 
     private:
         argparse::ArgumentParser parser;
