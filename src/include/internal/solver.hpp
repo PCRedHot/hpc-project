@@ -1,6 +1,7 @@
 #ifndef SOLVER_HPP
 #define SOLVER_HPP
 
+#include <memory>
 #include <vector>
 
 #include "discrete_2d.hpp"
@@ -11,8 +12,9 @@ namespace fin_diff {
 
     class Solver {
        public:
-        Solver() {};
-        ~Solver() {};
+        explicit Solver(Discretisation* d) : disc(std::shared_ptr<Discretisation>(d)) {};
+        explicit Solver(std::shared_ptr<Discretisation> d) : disc(std::move(d)) {};
+        virtual ~Solver() = default;
 
         virtual std::vector<double> solve() = 0;
         virtual std::vector<double> solve(std::vector<double> init_u) = 0;
@@ -22,11 +24,16 @@ namespace fin_diff {
 
        protected:
         SolverConfig config = SolverConfig();
+
+        std::shared_ptr<Discretisation> disc;
     };
 
     class JacobiSolver : public Solver {
        public:
-        JacobiSolver(Discretisation* disc) : disc(disc) {}
+        explicit JacobiSolver(Discretisation* d) : Solver(d) {}
+        explicit JacobiSolver(std::shared_ptr<Discretisation> d) : Solver(std::move(d)) {}
+
+        ~JacobiSolver() {};
 
         std::vector<double> solve() override {
             Mesh2D mesh = disc->get_mesh();
@@ -94,9 +101,6 @@ namespace fin_diff {
 
             return u.to_vector();
         }
-
-       private:
-        Discretisation* disc;
     };
 }  // namespace fin_diff
 

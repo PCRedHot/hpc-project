@@ -8,12 +8,14 @@
 
 namespace fin_diff {
 
-    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& coordinates,
-                   const std::vector<std::pair<size_t, size_t>>& lines)
-        : N_pt(coordinates.size()),
-          N_el(lines.size()),
-          coordinates(coordinates),
-          lines(lines) {
+    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& c,
+                   const std::vector<std::pair<size_t, size_t>>& l,
+                   const std::vector<std::array<size_t, 4>>& f)
+        : N_pt(c.size()),
+          N_el(l.size()),
+          coordinates(c),
+          lines(l),
+          faces(f) {
         // Count number of lines connected to each point
         std::unordered_map<size_t, size_t> line_count;
 
@@ -40,14 +42,16 @@ namespace fin_diff {
 #endif
     }
 
-    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& coordinates,
-                   const std::vector<std::pair<size_t, size_t>>& lines,
-                   const std::vector<bool>& boundary)
-        : N_pt(coordinates.size()),
-          N_el(lines.size()),
-          coordinates(coordinates),
-          lines(lines),
-          boundary(boundary) {
+    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& c,
+                   const std::vector<std::pair<size_t, size_t>>& l,
+                   const std::vector<std::array<size_t, 4>>& f,
+                   const std::vector<bool>& b)
+        : N_pt(c.size()),
+          N_el(l.size()),
+          coordinates(c),
+          lines(l),
+          faces(f),
+          boundary(b) {
         num_boundary_points = std::count(boundary.begin(), boundary.end(), true);
 #ifdef __DEBUG__
         std::cout << "Mesh2D Created" << std::endl;
@@ -68,9 +72,9 @@ namespace fin_diff {
         return lines;
     }
 
-    // const std::vector<std::pair<size_t, size_t>>& Mesh2D::get_faces() const {
-    //     return faces;
-    // }
+    const std::vector<std::array<size_t, 4>>& Mesh2D::get_faces() const {
+        return faces;
+    }
 
     void Mesh2D::write_to_vtk(const std::string& filename) const {
         std::ofstream file(filename);
@@ -89,21 +93,89 @@ namespace fin_diff {
                  << " 0.0\n";  // 2D points with z=0
         }
 
-        size_t num_cells = lines.size();
-        file << "CELLS " << num_cells << " " << 3 * num_cells << "\n";
-        for (const auto& conn : lines) {
-            file << "2 " << conn.first << " " << conn.second << "\n";
-        }
+        // Check if faces are present
+        if (faces.size() > 0) {
+            size_t num_cells = faces.size();
+            file << "CELLS " << num_cells << " " << 5 * num_cells << "\n";
+            for (const auto& conn : faces) {
+                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2] << " " << conn[3] << "\n";
+            }
 
-        file << "CELL_TYPES " << num_cells << "\n";
-        for (size_t i = 0; i < num_cells; ++i) {
-            file << "3\n";  // VTK_LINE
+            file << "CELL_TYPES " << num_cells << "\n";
+            for (size_t i = 0; i < num_cells; ++i) {
+                file << "9\n";  // VTK_QUAD
+            }
+        } else {
+            size_t num_cells = lines.size();
+            file << "CELLS " << num_cells << " " << 3 * num_cells << "\n";
+            for (const auto& conn : lines) {
+                file << "2 " << conn.first << " " << conn.second << "\n";
+            }
+
+            file << "CELL_TYPES " << num_cells << "\n";
+            for (size_t i = 0; i < num_cells; ++i) {
+                file << "3\n";  // VTK_LINE
+            }
         }
 
         file.close();
 #ifdef __DEBUG__
         std::cout << "Data written to " << filename << std::endl;
 #endif
+    }
+
+    void Mesh2D::write_field_to_vtk(const std::string& filename,
+                                    const std::vector<double>& field,
+                                    const std::string field_name) const {
+        std::ofstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Error opening file: " << filename << std::endl;
+            return;
+        }
+
+        file << "# vtk DataFile Version 3.0\n";
+        file << "Mesh2D Data\n";
+        file << "ASCII\n";
+        file << "DATASET UNSTRUCTURED_GRID\n";
+        file << "POINTS " << N_pt << " float\n";
+        for (const auto& coord : coordinates) {
+            file << coord.first << " " << coord.second
+                 << " 0.0\n";  // 2D points with z=0
+        }
+
+        if (faces.size() > 0) {
+            size_t num_cells = faces.size();
+            file << "CELLS " << num_cells << " " << 5 * num_cells << "\n";
+            for (const auto& conn : faces) {
+                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2] << " " << conn[3] << "\n";
+            }
+
+            file << "CELL_TYPES " << num_cells << "\n";
+            for (size_t i = 0; i < num_cells; ++i) {
+                file << "9\n";  // VTK_QUAD
+            }
+        } else {
+            size_t num_cells = lines.size();
+            file << "CELLS " << num_cells << " " << 3 * num_cells << "\n";
+            for (const auto& conn : lines) {
+                file << "2 " << conn.first << " " << conn.second << "\n";
+            }
+
+            file << "CELL_TYPES " << num_cells << "\n";
+            for (size_t i = 0; i < num_cells; ++i) {
+                file << "3\n";  // VTK_LINE
+            }
+        }
+
+        file << "POINT_DATA " << N_pt << "\n";
+        file << "SCALARS " << field_name << " float 1\n";
+        file << "LOOKUP_TABLE default\n";
+        for (const auto& val : field) {
+            file << val << "\n";
+        }
+
+        file.close();
     }
 
     std::vector<double> Mesh2D::get_field_from_expr(const std::string& expr) const {
@@ -130,7 +202,7 @@ namespace fin_diff {
     };
 
     RectMesh2D::RectMesh2D(size_t Nx, size_t Ny)
-        : Mesh2D(generate_coordinates(Nx, Ny), generate_lines(Nx, Ny)),
+        : Mesh2D(generate_coordinates(Nx, Ny), generate_lines(Nx, Ny), generate_faces(Nx, Ny)),
           Nx(Nx),
           Ny(Ny),
           dx(1.0 / (Nx - 1)),
@@ -212,6 +284,24 @@ namespace fin_diff {
         }
 
         return conn;
+    }
+
+    std::vector<std::array<size_t, 4>> RectMesh2D::generate_faces(size_t Nx, size_t Ny) {
+        std::vector<std::array<size_t, 4>> faces;
+        faces.reserve((Nx - 1) * (Ny - 1));
+
+        for (size_t j = 0; j < Ny - 1; j++) {
+            for (size_t i = 0; i < Nx - 1; i++) {
+                size_t p0 = j * Nx + i;
+                size_t p1 = p0 + 1;
+                size_t p2 = p0 + Nx;
+                size_t p3 = p2 + 1;
+
+                faces.push_back({p0, p1, p3, p2});
+            }
+        }
+
+        return faces;
     }
 
 }  // namespace fin_diff
