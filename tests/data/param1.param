@@ -20,4 +20,4 @@ DIRICHLET_BC sin(2 * pi * x) * sin(2 * pi * y)                  // Dirichlet Bou
 INIT_GUESS 0.0        // u_0 Initial guess value function expression
 
 // Output Setting
-OUTPUT ./output/output.vtk // Output File Path
+OUTPUT ./output/output.vtk // Output File

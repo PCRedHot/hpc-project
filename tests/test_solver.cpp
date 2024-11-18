@@ -27,7 +27,7 @@ TEST_CASE("Test Problem 1", "[test_problem_1]") {
     // Define the mesh
     int Nx = 10;
     int Ny = 10;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny);
     for (size_t i = 0; i < u_init.size(); i++) {
@@ -35,20 +35,20 @@ TEST_CASE("Test Problem 1", "[test_problem_1]") {
     }
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver->solve();
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {
@@ -69,25 +69,25 @@ TEST_CASE("Test Problem 2", "[test_problem_2]") {
     // Define the mesh
     int Nx = 10;
     int Ny = 10;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve(u_init);
+    auto u = solver->solve(u_init);
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {
@@ -108,25 +108,25 @@ TEST_CASE("Test Problem 2 - expr", "[test_problem_2_expr]") {
     // Define the mesh
     int Nx = 10;
     int Ny = 10;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver->solve();
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {
@@ -147,25 +147,25 @@ TEST_CASE("Test Problem 3", "[test_problem_3]") {
     // Define the mesh
     int Nx = 10;
     int Ny = 10;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver->solve();
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {
@@ -186,25 +186,25 @@ TEST_CASE("Test Problem 3 - expr", "[test_problem_3_expr]") {
     // Define the mesh
     int Nx = 10;
     int Ny = 10;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver->solve();
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {
@@ -225,25 +225,25 @@ TEST_CASE("Test Problem 3 - heavy", "[test_problem_3_heavy]") {
     // Define the mesh
     int Nx = 20;
     int Ny = 20;
-    RectMesh2D mesh(Nx, Ny);
+    auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
     std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
 
     // Define the discretisation
-    Discretisation2D disc(&mesh);
+    auto disc = std::make_shared<Discretisation2D>(mesh);
 
-    disc.add_forcing_term(f);
-    disc.add_dirichlet_bc(g);
+    disc->add_forcing_term(f);
+    disc->add_dirichlet_bc(g);
 
     // Define the solver
-    JacobiSolver solver(&disc);
+    auto solver = std::make_unique<JacobiSolver>(disc);
     SolverConfig config;
     config.set_max_iter(1000);
     config.set_convergence_tol(1e-6);
-    solver.set_config(config);
+    solver->set_config(config);
 
     // Solve the problem
-    auto u = solver.solve();
+    auto u = solver->solve();
 
     std::cout << "u: " << std::endl;
     for (size_t i = 0; i < u.size(); i++) {

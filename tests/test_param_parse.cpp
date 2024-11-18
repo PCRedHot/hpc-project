@@ -16,7 +16,7 @@ TEST_CASE("Read Parameter File 1", "[read_param_file_1]") {
     CHECK(param.get_init_guess_expr() == "0.0");
     CHECK(param.get_tolerance() == 1e-6);
     CHECK(param.get_max_iter() == 100);
-    CHECK(param.get_output_file() == "./output");
+    CHECK(param.get_output_file() == "./output/output.vtk");
 }
 
 TEST_CASE("Read Parameter File 2", "[read_param_file_2]") {
