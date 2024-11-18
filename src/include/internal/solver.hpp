@@ -12,7 +12,7 @@ namespace fin_diff {
 
     class Solver {
        public:
-        explicit Solver(Discretisation* d) : disc(std::shared_ptr<Discretisation>(d)) {};
+        // explicit Solver(Discretisation* d) : disc(std::shared_ptr<Discretisation>(d)) {};
         explicit Solver(std::shared_ptr<Discretisation> d) : disc(std::move(d)) {};
         virtual ~Solver() = default;
 
@@ -30,7 +30,7 @@ namespace fin_diff {
 
     class JacobiSolver : public Solver {
        public:
-        explicit JacobiSolver(Discretisation* d) : Solver(d) {}
+        // explicit JacobiSolver(Discretisation* d) : Solver(d) {}
         explicit JacobiSolver(std::shared_ptr<Discretisation> d) : Solver(std::move(d)) {}
 
         ~JacobiSolver() {};
@@ -93,10 +93,8 @@ namespace fin_diff {
                 // Calculate the norm of the residual
                 curr_tol = residual.norm() / residual.get_n_rows();
 
-#ifdef __DEBUG__
                 std::cout << "Iteration: " << n_iter
                           << ", Residual: " << curr_tol << std::endl;
-#endif
             }
 
             return u.to_vector();

@@ -10,12 +10,12 @@
 
 namespace fin_diff {
 
-    Discretisation2D::Discretisation2D(RectMesh2D *m) : Discretisation(m) {
-        _calculate_lhs();
-#ifdef __DEBUG__
-        std::cout << "Discretisation2D Created" << std::endl;
-#endif
-    }
+//     Discretisation2D::Discretisation2D(RectMesh2D *m) : Discretisation(m) {
+//         _calculate_lhs();
+// #ifdef __DEBUG__
+//         std::cout << "Discretisation2D Created" << std::endl;
+// #endif
+//     }
 
     Discretisation2D::Discretisation2D(std::shared_ptr<RectMesh2D> m) : Discretisation(std::move(m)) {
         _calculate_lhs();

@@ -199,35 +199,6 @@ namespace fin_diff {
         }
     }
 
-    // template <typename _T>
-    // MatrixCRS<_T> MatrixCRS<_T>::from_dense(const Matrix<_T>& mat) {
-    //     MatrixCRS<_T> crs(mat.get_n_rows(), mat.get_n_cols());
-
-    //     for (size_t i = 0; i < mat.get_n_rows(); i++) {
-    //         bool has_non_zero = false;
-    //         for (size_t j = 0; j < mat.get_n_cols(); j++) {
-    //             _T val = mat.get(i, j);
-    //             if (val != _T{}) {
-    //                 crs.values.push_back(val);
-    //                 crs.col_indices.push_back(j);
-
-    //                 if (!has_non_zero) {
-    //                     has_non_zero = true;
-    //                     crs.row_ptrs[i] = crs.values.size() - 1;
-    //                 }
-    //             }
-    //         }
-
-    //         if (!has_non_zero) {
-    //             crs.row_ptrs[i] = crs.values.size();
-    //         }
-    //     }
-
-    //     crs.row_ptrs[crs.get_n_rows()] = crs.values.size();
-
-    //     return crs;
-    // }
-
     template <typename _T>
     void MatrixCRS<_T>::print() const {
         // TODO: Better way to print the matrix

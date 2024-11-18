@@ -1,6 +1,12 @@
 #ifndef LHS2D_HPP
 #define LHS2D_HPP
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 #include <functional>
 #include <memory>
 
@@ -11,7 +17,7 @@ namespace fin_diff {
 
     class Discretisation {
     public:
-        explicit Discretisation(Mesh2D* m) : mesh(std::shared_ptr<Mesh2D>(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
+        // explicit Discretisation(Mesh2D* m) : mesh(std::shared_ptr<Mesh2D>(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
         explicit Discretisation(std::shared_ptr<Mesh2D> m) : mesh(std::move(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
 
         virtual ~Discretisation() = default;
@@ -30,7 +36,7 @@ namespace fin_diff {
 
     class Discretisation2D : public Discretisation {
        public:
-        explicit Discretisation2D(RectMesh2D* m);
+        // explicit Discretisation2D(RectMesh2D* m);
         explicit Discretisation2D(std::shared_ptr<RectMesh2D> m);
 
         ~Discretisation2D();
