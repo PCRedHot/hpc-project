@@ -3,3 +3,9 @@
 
 build/
 build/*
+
+build_debug/
+build_debug/*
+
+.git/
+.git/*
