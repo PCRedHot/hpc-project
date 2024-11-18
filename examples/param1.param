@@ -1,8 +1,6 @@
 # This is a comment
 // This is also a comment. Empty line (below) is ignored
 
-// This is a comment block
-
 // Mesh Setting
 DIMENSION 2     // Dimension of the problem. One of {2}
 NUM_X 5         // Number of nodes in x-direction
