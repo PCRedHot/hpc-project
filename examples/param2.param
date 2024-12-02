@@ -3,8 +3,8 @@
 
 // Mesh Setting
 DIMENSION 2     // Dimension of the problem. One of {2}
-NUM_X 2         // Number of nodes in x-direction
-NUM_Y 2         // Number of nodes in y-direction
+NUM_X 5         // Number of nodes in x-direction
+NUM_Y 5         // Number of nodes in y-direction
 # NUM_Z 5       // Number of nodes in z-direction (Only possible when dim is 3)
 
 // Solver Setting
