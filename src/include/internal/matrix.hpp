@@ -245,6 +245,22 @@ namespace fin_diff {
             return std::sqrt(sum);
         }
 
+        double weighted_norm() const {
+            if (this->get_n_rows() != 1 && this->get_n_cols() != 1) {
+                throw std::invalid_argument(
+                    "Norm can only be calculated for vectors (1D matrices)");
+            }
+
+            double sum = 0;
+            for (int i = 0; i < this->get_n_cols() * this->get_n_rows(); i++) {
+                sum += data[i] * data[i];
+            }
+
+            sum /= this->get_n_cols();
+
+            return std::sqrt(sum);
+        }
+
         std::vector<_T> to_vector() const {
             if (this->get_n_cols() != 1 && this->get_n_rows() != 1) {
                 throw std::invalid_argument(
