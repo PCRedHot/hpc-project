@@ -15,6 +15,7 @@ MAX_ITER 100    // Maximum number of iterations
 // Equation Setting
 FORCING_TERM 8 * pi^2 * (sin(2 * pi * x) * sin(2 * pi * y))     // Forcing term f(x, y)
 DIRICHLET_BC sin(2 * pi * x) * sin(2 * pi * y)                  // Dirichlet Boundary Condition g(x, y)
+EXACT_SOL sin(2 * pi * x) * sin(2 * pi * y)                     // Exact Solution u(x, y) if this is given -> give exact solution norm
 INIT_GUESS 0.0        // u_0 Initial guess value function expression
 
 // Output Setting

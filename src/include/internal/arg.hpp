@@ -30,7 +30,7 @@ namespace fin_diff {
                 .action([](const std::string& value) { return std::stoi(value); });
             parser.add_argument("-z", "--num_z")
                 .help("Number of grid points in z direction (Only for 3D)")
-                .default_value(5)
+                .default_value(0)
                 .action([](const std::string& value) { return std::stoi(value); });
 
             parser.add_argument("-s", "--solver")
@@ -56,10 +56,12 @@ namespace fin_diff {
             parser.add_argument("-g", "--dirichlet-bc")
                 .help("Dirichlet boundary condition function g(x)")
                 .default_value(std::string("0.0"));
+            parser.add_argument("-e", "--exact-solution")
+                .help("Exact solution function u(x)");
 
             parser.add_argument("-o", "--output")
                 .help("Output file path")
-                .default_value(std::string("./output"));
+                .default_value(std::string("./output/output.vtk"));
                 
             try {
                 parser.parse_args(argc, argv);
@@ -82,6 +84,7 @@ namespace fin_diff {
         std::string get_init_guess_func_expr() { return parser.get<std::string>("--init-guess"); }
         std::string get_forcing_term_func_expr() { return parser.get<std::string>("--forcing-term"); }
         std::string get_dirichlet_bc_func_expr() { return parser.get<std::string>("--dirichlet-bc"); }
+        std::string get_exact_sol_func_expr() { return parser.get<std::string>("--exact-solution"); }
         std::string get_output_file() { return parser.get<std::string>("--output"); }
 
     private:

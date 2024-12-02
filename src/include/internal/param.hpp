@@ -20,6 +20,7 @@
 #define _PARAM_MAX_ITER_KEY "MAX_ITER"
 #define _PARAM_FORCING_TERM_KEY "FORCING_TERM"
 #define _PARAM_DIRICHLET_BC_KEY "DIRICHLET_BC"
+#define _PARAM_EXACT_SOL_KEY "EXACT_SOL"
 #define _PARAM_INIT_GUESS_KEY "INIT_GUESS"
 #define _PARAM_OUTPUT_FILE_KEY "OUTPUT"
 
@@ -45,11 +46,19 @@ namespace fin_diff {
             solver = parser.get_solver();
             tolerance = parser.get_tolerance();
             max_iter = parser.get_max_iter();
+            forcing_term_expr = parser.get_forcing_term_func_expr();
+            dirichlet_bc_expr = parser.get_dirichlet_bc_func_expr();
+            exact_sol_expr = parser.get_exact_sol_func_expr();
             init_guess_expr = parser.get_init_guess_func_expr();
 
             output_file = parser.get_output_file();
 
-            check_valid();
+            try {
+                check_valid();
+            } catch (const std::invalid_argument& err) {
+                std::cerr << "Error: Invalid parameter file" << std::endl;
+                throw std::invalid_argument("Invalid parameter file");
+            }
         }
 
         Parameter(const std::string& param_file) {
@@ -127,6 +136,8 @@ namespace fin_diff {
                         forcing_term_expr = value;
                     else if (key == _PARAM_DIRICHLET_BC_KEY)
                         dirichlet_bc_expr = value;
+                    else if (key == _PARAM_EXACT_SOL_KEY)
+                        exact_sol_expr = value;
                     else if (key == _PARAM_OUTPUT_FILE_KEY)
                         output_file = value;
                     else {
@@ -162,6 +173,7 @@ namespace fin_diff {
         std::string get_init_guess_expr() const { return init_guess_expr; }
         std::string get_forcing_term_expr() const { return forcing_term_expr; }
         std::string get_dirichlet_bc_expr() const { return dirichlet_bc_expr; }
+        std::string get_exact_sol_expr() const { return exact_sol_expr; }
         std::string get_output_file() const { return output_file; }
 
         void print() const {
@@ -178,6 +190,9 @@ namespace fin_diff {
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Initial guess") << "| " << init_guess_expr << std::endl;
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Forcing term") << "| " << forcing_term_expr << std::endl;
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Dirichlet BC") << "| " << dirichlet_bc_expr << std::endl;
+            if (!exact_sol_expr.empty()) {
+                std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Exact solution") << "| " << exact_sol_expr << std::endl;
+            }
             std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Output file") << "| " << output_file << std::endl;
         }
 
@@ -193,6 +208,7 @@ namespace fin_diff {
         std::string init_guess_expr;
         std::string forcing_term_expr;
         std::string dirichlet_bc_expr;
+        std::string exact_sol_expr;
 
         std::string output_file;
 

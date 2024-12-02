@@ -14,6 +14,9 @@ TEST_CASE("Read Parameter File 1", "[read_param_file_1]") {
     CHECK(param.get_num_z() == 0);
     CHECK(param.get_solver() == "jacobi");
     CHECK(param.get_init_guess_expr() == "0.0");
+    CHECK(param.get_forcing_term_expr() == "8 * pi^2 * (sin(2 * pi * x) * sin(2 * pi * y))");
+    CHECK(param.get_dirichlet_bc_expr() == "sin(2 * pi * x) * sin(2 * pi * y)");
+    CHECK(param.get_exact_sol_expr() == "sin(2 * pi * x) * sin(2 * pi * y)");
     CHECK(param.get_tolerance() == 1e-6);
     CHECK(param.get_max_iter() == 100);
     CHECK(param.get_output_file() == "./output/output.vtk");
