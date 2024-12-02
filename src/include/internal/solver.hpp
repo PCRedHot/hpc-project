@@ -91,7 +91,8 @@ namespace fin_diff {
                 Matrix<double> residual = A * u - b;
 
                 // Calculate the norm of the residual
-                curr_tol = residual.norm() / residual.get_n_rows();
+                // curr_tol = residual.norm() / residual.get_n_rows();
+                curr_tol = residual.weighted_norm();
 
                 std::cout << "Iteration: " << n_iter
                           << ", Residual: " << curr_tol << std::endl;
