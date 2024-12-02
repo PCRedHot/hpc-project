@@ -11,11 +11,7 @@ namespace fin_diff {
     Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& c,
                    const std::vector<std::pair<size_t, size_t>>& l,
                    const std::vector<std::array<size_t, 4>>& f)
-        : N_pt(c.size()),
-          N_el(l.size()),
-          coordinates(c),
-          lines(l),
-          faces(f) {
+        : N_pt(c.size()), N_el(l.size()), coordinates(c), lines(l), faces(f) {
         // Count number of lines connected to each point
         std::unordered_map<size_t, size_t> line_count;
 
@@ -52,7 +48,8 @@ namespace fin_diff {
           lines(l),
           faces(f),
           boundary(b) {
-        num_boundary_points = std::count(boundary.begin(), boundary.end(), true);
+        num_boundary_points =
+            std::count(boundary.begin(), boundary.end(), true);
 #ifdef __DEBUG__
         std::cout << "Mesh2D Created" << std::endl;
 #endif
@@ -64,7 +61,8 @@ namespace fin_diff {
 #endif
     }
 
-    const std::vector<std::pair<double, double>>& Mesh2D::get_coordinates() const {
+    const std::vector<std::pair<double, double>>& Mesh2D::get_coordinates()
+        const {
         return coordinates;
     }
 
@@ -98,7 +96,8 @@ namespace fin_diff {
             size_t num_cells = faces.size();
             file << "CELLS " << num_cells << " " << 5 * num_cells << "\n";
             for (const auto& conn : faces) {
-                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2] << " " << conn[3] << "\n";
+                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2]
+                     << " " << conn[3] << "\n";
             }
 
             file << "CELL_TYPES " << num_cells << "\n";
@@ -148,7 +147,8 @@ namespace fin_diff {
             size_t num_cells = faces.size();
             file << "CELLS " << num_cells << " " << 5 * num_cells << "\n";
             for (const auto& conn : faces) {
-                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2] << " " << conn[3] << "\n";
+                file << "4 " << conn[0] << " " << conn[1] << " " << conn[2]
+                     << " " << conn[3] << "\n";
             }
 
             file << "CELL_TYPES " << num_cells << "\n";
@@ -178,12 +178,17 @@ namespace fin_diff {
         file.close();
     }
 
-    std::vector<double> Mesh2D::get_field_from_expr(const std::string& expr) const {
+    std::vector<double> Mesh2D::get_field_from_expr(
+        const std::string& expr) const {
+#ifdef __DEBUG__
+        std::cout << "Generating field from expression: " << expr << std::endl;
+#endif
         double x, y;
 
         exprtk::symbol_table<double> symbol_table;
         symbol_table.add_variable("x", x);
         symbol_table.add_variable("y", y);
+        symbol_table.add_constants();
 
         exprtk::expression<double> expression;
         expression.register_symbol_table(symbol_table);
@@ -202,15 +207,16 @@ namespace fin_diff {
     };
 
     RectMesh2D::RectMesh2D(size_t Nx, size_t Ny)
-        : Mesh2D(generate_coordinates(Nx, Ny), generate_lines(Nx, Ny), generate_faces(Nx, Ny)),
+        : Mesh2D(generate_coordinates(Nx, Ny), generate_lines(Nx, Ny),
+                 generate_faces(Nx, Ny)),
           Nx(Nx),
           Ny(Ny),
           dx(1.0 / (Nx - 1)),
           dy(1.0 / (Ny - 1)) {
         this->boundary.reserve(Nx * Ny);
         for (size_t i = 0; i < Nx * Ny; i++) {
-            bool is_boundary_pt = (i / Nx == 0 || i % Nx == 0 || i % Nx == Nx - 1 ||
-                                   i / Nx == Ny - 1);
+            bool is_boundary_pt = (i / Nx == 0 || i % Nx == 0 ||
+                                   i % Nx == Nx - 1 || i / Nx == Ny - 1);
             this->boundary.push_back(is_boundary_pt);
 
             if (is_boundary_pt) {
@@ -257,8 +263,8 @@ namespace fin_diff {
         return coords;
     }
 
-    std::vector<std::pair<size_t, size_t>> RectMesh2D::generate_lines(size_t Nx,
-                                                                      size_t Ny) {
+    std::vector<std::pair<size_t, size_t>> RectMesh2D::generate_lines(
+        size_t Nx, size_t Ny) {
         std::vector<std::pair<size_t, size_t>> conn;
         conn.reserve((Nx - 1) * (Ny - 1) * 2 + (Nx - 1) + (Ny - 1));
 
@@ -286,7 +292,8 @@ namespace fin_diff {
         return conn;
     }
 
-    std::vector<std::array<size_t, 4>> RectMesh2D::generate_faces(size_t Nx, size_t Ny) {
+    std::vector<std::array<size_t, 4>> RectMesh2D::generate_faces(size_t Nx,
+                                                                  size_t Ny) {
         std::vector<std::array<size_t, 4>> faces;
         faces.reserve((Nx - 1) * (Ny - 1));
 

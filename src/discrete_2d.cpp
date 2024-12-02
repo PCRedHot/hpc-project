@@ -192,7 +192,6 @@ namespace fin_diff {
         for (int i = 0; i < get_mesh().get_num_points(); i++) {
             bool is_boundary = get_mesh().is_boundary(i);
 
-            auto coords = get_mesh().get_coordinates();
             x = coords[i].first;
             y = coords[i].second;
 
