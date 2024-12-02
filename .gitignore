@@ -1,11 +1,8 @@
 .vscode/
 .vscode/*
 
-build/
-build/*
-
-build_debug/
-build_debug/*
+build*/
+build*/*
 
 .git/
 .git/*
