@@ -13,6 +13,17 @@ To build the project in release mode, run the following commands:
 
 This script will create a `build` directory, run CMake with the `Release` build type, and build the project.
 
+## Floating Point Precision
+
+The precision could be set with `-DPRECISION=float`, or simply use the shell script
+
+```sh
+./build_float.sh
+```
+
+This script will create a `build_float` directory, run CMake with the `Release` build type, and build the project.
+
+
 ### Debug Mode
 
 To build the project in debug mode, run the following commands:
