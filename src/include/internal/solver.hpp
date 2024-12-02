@@ -8,6 +8,12 @@
 #include "matrix.hpp"
 #include "solver_config.hpp"
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 namespace fin_diff {
 
     class Solver {
@@ -16,8 +22,8 @@ namespace fin_diff {
         explicit Solver(std::shared_ptr<Discretisation> d) : disc(std::move(d)) {};
         virtual ~Solver() = default;
 
-        virtual std::vector<double> solve() = 0;
-        virtual std::vector<double> solve(std::vector<double> init_u) = 0;
+        virtual std::vector<PrecisionType> solve() = 0;
+        virtual std::vector<PrecisionType> solve(std::vector<PrecisionType> init_u) = 0;
 
         void set_config(SolverConfig config) { this->config = config; }
         SolverConfig* get_config() { return &config; }
@@ -35,14 +41,14 @@ namespace fin_diff {
 
         ~JacobiSolver() {};
 
-        std::vector<double> solve() override {
+        std::vector<PrecisionType> solve() override {
             Mesh2D mesh = disc->get_mesh();
 
-            std::vector<double> init_u(mesh.get_num_points(), 0.0);
+            std::vector<PrecisionType> init_u(mesh.get_num_points(), 0.0);
             return this->solve(init_u);
         };
 
-        std::vector<double> solve(std::vector<double> init_u) override {
+        std::vector<PrecisionType> solve(std::vector<PrecisionType> init_u) override {
             auto A = disc->get_lhs();
             auto b = disc->get_rhs();
 
@@ -54,26 +60,26 @@ namespace fin_diff {
             b.print();
 #endif
 
-            MatrixDiagonal<double> D = MatrixDiagonal<double>(A);
+            MatrixDiagonal<PrecisionType> D = MatrixDiagonal<PrecisionType>(A);
 
 #ifdef __DEBUG__
             std::cout << "D: " << std::endl;
             D.print();
 #endif
-            MatrixDiagonal<double> D_inv = MatrixDiagonal<double>(D);
+            MatrixDiagonal<PrecisionType> D_inv = MatrixDiagonal<PrecisionType>(D);
             D_inv.inv();
 
-            MatrixCRS<double> LU = A - D;
+            MatrixCRS<PrecisionType> LU = A - D;
 
-            Matrix<double> u = Matrix<double>(b.get_n_rows(), 1, init_u);
-            Matrix<double> u_new = Matrix<double>(u.get_n_rows(), 1);
+            Matrix<PrecisionType> u = Matrix<PrecisionType>(b.get_n_rows(), 1, init_u);
+            Matrix<PrecisionType> u_new = Matrix<PrecisionType>(u.get_n_rows(), 1);
 
             // Solve the system
-            const double tol = config.get_convergence_tol();
+            const auto tol = config.get_convergence_tol();
             const size_t max_iter = config.get_max_iter();
 
             size_t n_iter = 0;
-            double curr_tol = 1e20;
+            PrecisionType curr_tol = 1e20;
 #ifdef __DEBUG__
             std::cout << "D_inv: " << std::endl;
             D_inv.print();
@@ -88,7 +94,7 @@ namespace fin_diff {
                 n_iter++;
 
                 // Calculate the residual
-                Matrix<double> residual = A * u - b;
+                Matrix<PrecisionType> residual = A * u - b;
 
                 // Calculate the norm of the residual
                 // curr_tol = residual.norm() / residual.get_n_rows();

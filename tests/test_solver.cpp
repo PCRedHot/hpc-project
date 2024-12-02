@@ -9,6 +9,12 @@
 #include "discrete_2d.hpp"
 #include "mesh2d.hpp"
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 using namespace fin_diff;
 
 TEST_CASE("Test Problem 1", "[test_problem_1]") {
@@ -20,8 +26,8 @@ TEST_CASE("Test Problem 1", "[test_problem_1]") {
 
 
     // Define the problem
-    auto f = [](double x, double y) { return 0.0; };
-    auto g = [](double x, double y) { return 0.0; };
+    auto f = [](PrecisionType x, PrecisionType y) { return 0.0; };
+    auto g = [](PrecisionType x, PrecisionType y) { return 0.0; };
 
 
     // Define the mesh
@@ -29,7 +35,7 @@ TEST_CASE("Test Problem 1", "[test_problem_1]") {
     int Ny = 10;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny);
     for (size_t i = 0; i < u_init.size(); i++) {
         u_init[i] = dis(gen);
     }
@@ -62,8 +68,8 @@ TEST_CASE("Test Problem 2", "[test_problem_2]") {
     // auto f = "8 * pi * pi * sin(2 * pi * x) * sin(2 * pi * y)";
     // auto g = "sin(2 * pi * x) * sin(2 * pi * y)";
 
-    auto f = [](double x, double y) { return 8 * M_PI * M_PI * std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
-    auto g = [](double x, double y) { return std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
+    auto f = [](PrecisionType x, PrecisionType y) { return 8 * M_PI * M_PI * std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
+    auto g = [](PrecisionType x, PrecisionType y) { return std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
 
 
     // Define the mesh
@@ -71,7 +77,7 @@ TEST_CASE("Test Problem 2", "[test_problem_2]") {
     int Ny = 10;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny, 0.0);
 
     // Define the discretisation
     auto disc = std::make_shared<Discretisation2D>(mesh);
@@ -101,8 +107,8 @@ TEST_CASE("Test Problem 2 - expr", "[test_problem_2_expr]") {
     auto f = "8 * pi * pi * sin(2 * pi * x) * sin(2 * pi * y)";
     auto g = "sin(2 * pi * x) * sin(2 * pi * y)";
 
-    // auto f = [](double x, double y) { return 8 * M_PI * M_PI * std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
-    // auto g = [](double x, double y) { return std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
+    // auto f = [](PrecisionType x, PrecisionType y) { return 8 * M_PI * M_PI * std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
+    // auto g = [](PrecisionType x, PrecisionType y) { return std::sin(2 * M_PI * x) * std::sin(2 * M_PI * y); };
 
 
     // Define the mesh
@@ -110,7 +116,7 @@ TEST_CASE("Test Problem 2 - expr", "[test_problem_2_expr]") {
     int Ny = 10;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny, 0.0);
 
     // Define the discretisation
     auto disc = std::make_shared<Discretisation2D>(mesh);
@@ -140,8 +146,8 @@ TEST_CASE("Test Problem 3", "[test_problem_3]") {
     // auto f = "3 / 2 * sin(2 * x) * sinh(y)";
     // auto g = "1 / 2 * sin(2 * x) * sinh(y)";
 
-    auto f = [](double x, double y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
-    auto g = [](double x, double y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    auto f = [](PrecisionType x, PrecisionType y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    auto g = [](PrecisionType x, PrecisionType y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
 
 
     // Define the mesh
@@ -149,7 +155,7 @@ TEST_CASE("Test Problem 3", "[test_problem_3]") {
     int Ny = 10;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny, 0.0);
 
     // Define the discretisation
     auto disc = std::make_shared<Discretisation2D>(mesh);
@@ -179,8 +185,8 @@ TEST_CASE("Test Problem 3 - expr", "[test_problem_3_expr]") {
     auto f = "3 / 2 * sin(2 * x) * sinh(y)";
     auto g = "1 / 2 * sin(2 * x) * sinh(y)";
 
-    // auto f = [](double x, double y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
-    // auto g = [](double x, double y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    // auto f = [](PrecisionType x, PrecisionType y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    // auto g = [](PrecisionType x, PrecisionType y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
 
 
     // Define the mesh
@@ -188,7 +194,7 @@ TEST_CASE("Test Problem 3 - expr", "[test_problem_3_expr]") {
     int Ny = 10;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny, 0.0);
 
     // Define the discretisation
     auto disc = std::make_shared<Discretisation2D>(mesh);
@@ -218,8 +224,8 @@ TEST_CASE("Test Problem 3 - heavy", "[test_problem_3_heavy]") {
     // auto f = "3 / 2 * sin(2 * x) * sinh(y)";
     // auto g = "1 / 2 * sin(2 * x) * sinh(y)";
 
-    auto f = [](double x, double y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
-    auto g = [](double x, double y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    auto f = [](PrecisionType x, PrecisionType y) { return 3.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
+    auto g = [](PrecisionType x, PrecisionType y) { return 1.0 / 2.0 * std::sin(2 * x) * std::sinh(y); };
 
 
     // Define the mesh
@@ -227,7 +233,7 @@ TEST_CASE("Test Problem 3 - heavy", "[test_problem_3_heavy]") {
     int Ny = 20;
     auto mesh = std::make_shared<RectMesh2D>(Nx, Ny);
 
-    std::vector<double> u_init = std::vector<double>(Nx * Ny, 0.0);
+    std::vector<PrecisionType> u_init = std::vector<PrecisionType>(Nx * Ny, 0.0);
 
     // Define the discretisation
     auto disc = std::make_shared<Discretisation2D>(mesh);

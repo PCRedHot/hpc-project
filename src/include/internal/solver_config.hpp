@@ -6,6 +6,7 @@
 #include "discrete_2d.hpp"
 #include "matrix.hpp"
 #include "param.hpp"
+
 namespace fin_diff {
 
     class SolverConfig {

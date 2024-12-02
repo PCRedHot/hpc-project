@@ -1,14 +1,14 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
-#include <sstream>
-#include <cmath>
 
 namespace fin_diff {
 
@@ -111,13 +111,13 @@ namespace fin_diff {
         }
 
         void print() const {
-        for (size_t i = 0; i < this->rows; ++i) {
-            for (size_t j = 0; j < this->cols; ++j) {
-                std::cout << get(i, j) << " ";
+            for (size_t i = 0; i < this->rows; ++i) {
+                for (size_t j = 0; j < this->cols; ++j) {
+                    std::cout << get(i, j) << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-        }
-    };
+        };
 
        protected:
         size_t rows, cols;
@@ -133,7 +133,10 @@ namespace fin_diff {
 
         void validate_matrix_mul(const MatrixBase<_T>& o) const {
             if (this->get_n_cols() != o.get_n_rows()) {
-                std::cerr << "Matrix dimensions do not match: " << this->get_n_rows() << "x" << this->get_n_cols() << " times " << o.get_n_rows() << "x" << o.get_n_cols() << std::endl;
+                std::cerr << "Matrix dimensions do not match: "
+                          << this->get_n_rows() << "x" << this->get_n_cols()
+                          << " times " << o.get_n_rows() << "x"
+                          << o.get_n_cols() << std::endl;
                 throw std::invalid_argument("Matrix dimensions do not match");
             }
         }
@@ -318,7 +321,7 @@ namespace fin_diff {
 
             Proxy& operator+=(_T val) {
                 size_t index = matrix._find(row, col);
-                double entry_val = index != -1 ? matrix.values[index] : 0.0;
+                _T entry_val = index != -1 ? matrix.values[index] : 0.0;
 
                 matrix._unsave_set(row, col, index, entry_val + val);
                 return *this;
@@ -326,7 +329,7 @@ namespace fin_diff {
 
             Proxy& operator-=(_T val) {
                 size_t index = matrix._find(row, col);
-                double entry_val = index != -1 ? matrix.values[index] : 0.0;
+                _T entry_val = index != -1 ? matrix.values[index] : 0.0;
 
                 matrix._unsave_set(row, col, index, entry_val - val);
                 return *this;
@@ -524,7 +527,6 @@ namespace fin_diff {
             this->diagonal_validate(i, j);
 
             return data[i];
-
         }
 
         const _T operator()(size_t i, size_t j) const {

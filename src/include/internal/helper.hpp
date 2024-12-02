@@ -15,6 +15,12 @@
 #include <unistd.h>
 #endif
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 
 namespace fin_diff {
 

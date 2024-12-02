@@ -8,6 +8,12 @@
 #include "matrix.hpp"
 #include "mesh2d.hpp"
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 namespace fin_diff {
 
 //     Discretisation2D::Discretisation2D(RectMesh2D *m) : Discretisation(m) {
@@ -30,12 +36,12 @@ namespace fin_diff {
 #endif
     }
 
-    void Discretisation2D::add_forcing_term(double val) {
+    void Discretisation2D::add_forcing_term(PrecisionType val) {
         this->forcing_terms_val.push_back(val);
         this->rhs_ready = false;
     }
 
-    void Discretisation2D::add_forcing_term(const std::function<double(double, double)> &func) {
+    void Discretisation2D::add_forcing_term(const std::function<PrecisionType(PrecisionType, PrecisionType)> &func) {
         this->forcing_terms_func.push_back(func);
         this->rhs_ready = false;
     }
@@ -45,12 +51,12 @@ namespace fin_diff {
         this->rhs_ready = false;
     }
 
-    void Discretisation2D::add_dirichlet_bc(double val) {
+    void Discretisation2D::add_dirichlet_bc(PrecisionType val) {
         this->dirichlet_bcs_val.push_back(val);
         this->rhs_ready = false;
     }
 
-    void Discretisation2D::add_dirichlet_bc(const std::function<double(double, double)> &func) {
+    void Discretisation2D::add_dirichlet_bc(const std::function<PrecisionType(PrecisionType, PrecisionType)> &func) {
         this->dirichlet_bcs_func.push_back(func);
         this->rhs_ready = false;
     }
@@ -84,8 +90,8 @@ namespace fin_diff {
         auto lines = get_mesh().get_lines();
         auto coords = get_mesh().get_coordinates();
 
-        double dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
-        double dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
+        PrecisionType dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
+        PrecisionType dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
 
         for (int i = 0; i < lines.size(); i++) {
             auto line = lines[i];
@@ -101,7 +107,7 @@ namespace fin_diff {
                 continue;
             }
 
-            double d_sq = 0.0;
+            PrecisionType d_sq = 0.0;
 
             if (p2 - p1 == 1) {  // p2 is always greater than p1
                 // Horizontal line
@@ -149,11 +155,11 @@ namespace fin_diff {
         auto coords = get_mesh().get_coordinates();
 
         // preprocess string expressions
-        typedef exprtk::symbol_table<double> symbol_table_t;
-        typedef exprtk::expression<double> expression_t;
-        typedef exprtk::parser<double> parser_t;
+        typedef exprtk::symbol_table<PrecisionType> symbol_table_t;
+        typedef exprtk::expression<PrecisionType> expression_t;
+        typedef exprtk::parser<PrecisionType> parser_t;
 
-        double x, y;
+        PrecisionType x, y;
 
         symbol_table_t symbol_table;
         symbol_table.add_variable("x", x);
@@ -184,10 +190,10 @@ namespace fin_diff {
         }
 
         // Apply forcing terms and set Dirichlet BCs
-        double dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
-        double dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
+        PrecisionType dx_sq = get_mesh().get_dx() * get_mesh().get_dx();
+        PrecisionType dy_sq = get_mesh().get_dy() * get_mesh().get_dy();
 
-        double f_mul = dx_sq * dy_sq;
+        PrecisionType f_mul = dx_sq * dy_sq;
 
         for (int i = 0; i < get_mesh().get_num_points(); i++) {
             bool is_boundary = get_mesh().is_boundary(i);
@@ -246,7 +252,7 @@ namespace fin_diff {
                 continue;
             }
 
-            double d_sq = 0.0;
+            PrecisionType d_sq = 0.0;
             if (coords[p1].first == coords[p2].first) {
                 // Horizontal line
                 d_sq = dy_sq;

@@ -8,6 +8,12 @@
 #include "arg.hpp"
 #include "helper.hpp"
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 #define _PARAM_PRINT_KEY_WIDTH 21
 #define _PARAM_PRINT_VAL_WIDTH 31
 
@@ -70,15 +76,24 @@ namespace fin_diff {
             std::ifstream file(param_file);
 
             if (!file.is_open()) {
-                std::cerr << "Error: Parameter file not found: " << param_file << std::endl;
+                std::cerr << "Error: Parameter file not found: " << param_file
+                          << std::endl;
                 throw std::invalid_argument("Parameter file not found");
             }
 
             std::string line;
             while (std::getline(file, line)) {
                 // Erase leading and trailing whitespaces
-                line.erase(line.begin(), std::find_if(line.begin(), line.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-                line.erase(std::find_if(line.rbegin(), line.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), line.end());
+                line.erase(
+                    line.begin(),
+                    std::find_if(
+                        line.begin(), line.end(),
+                        std::not1(std::ptr_fun<int, int>(std::isspace))));
+                line.erase(std::find_if(
+                               line.rbegin(), line.rend(),
+                               std::not1(std::ptr_fun<int, int>(std::isspace)))
+                               .base(),
+                           line.end());
 
                 // Erase comments with #
                 size_t pos = line.find("#");
@@ -93,7 +108,11 @@ namespace fin_diff {
                 }
 
                 // Erase trailing whitespaces again
-                line.erase(std::find_if(line.rbegin(), line.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), line.end());
+                line.erase(std::find_if(
+                               line.rbegin(), line.rend(),
+                               std::not1(std::ptr_fun<int, int>(std::isspace)))
+                               .base(),
+                           line.end());
 
                 // Skip empty lines
                 if (line.empty()) {
@@ -108,7 +127,8 @@ namespace fin_diff {
                 pos = line.find(" ");
 
                 if (pos == std::string::npos) {
-                    std::cerr << "Error: Invalid parameter file format" << std::endl;
+                    std::cerr << "Error: Invalid parameter file format"
+                              << std::endl;
                     std::cerr << "Line: " << line << std::endl;
                 }
 
@@ -141,15 +161,21 @@ namespace fin_diff {
                     else if (key == _PARAM_OUTPUT_FILE_KEY)
                         output_file = value;
                     else {
-                        std::cerr << "Error: Invalid key in parameter file" << std::endl;
-                        throw std::invalid_argument("Invalid key in parameter file");
+                        std::cerr << "Error: Invalid key in parameter file"
+                                  << std::endl;
+                        throw std::invalid_argument(
+                            "Invalid key in parameter file");
                     }
                 } catch (const std::invalid_argument& err) {
-                    std::cerr << "Error: Invalid parsing value in parameter file" << std::endl;
-                    std::cerr << "Key: " << key << ", Value: " << value << std::endl;
+                    std::cerr
+                        << "Error: Invalid parsing value in parameter file"
+                        << std::endl;
+                    std::cerr << "Key: " << key << ", Value: " << value
+                              << std::endl;
                     file.close();
 
-                    throw std::invalid_argument("Invalid parsing value in parameter file");
+                    throw std::invalid_argument(
+                        "Invalid parsing value in parameter file");
                 }
             }
 
@@ -177,23 +203,48 @@ namespace fin_diff {
         std::string get_output_file() const { return output_file; }
 
         void print() const {
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Parameter") << "| " << std::setw(_PARAM_PRINT_VAL_WIDTH) << centered("Value") << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << std::setfill('-') << "" << "| " << std::setw(_PARAM_PRINT_VAL_WIDTH) << "" << std::endl
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Parameter") << "| "
+                      << std::setw(_PARAM_PRINT_VAL_WIDTH) << centered("Value")
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << std::setfill('-') << "" << "| "
+                      << std::setw(_PARAM_PRINT_VAL_WIDTH) << "" << std::endl
                       << std::setfill(' ');
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Dimension") << "| " << dimension << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Nx") << "| " << num_x << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Ny") << "| " << num_y << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Nz") << "| " << num_z << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Solver") << "| " << solver << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Tolerance") << "| " << tolerance << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Maximum iterations") << "| " << max_iter << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Initial guess") << "| " << init_guess_expr << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Forcing term") << "| " << forcing_term_expr << std::endl;
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Dirichlet BC") << "| " << dirichlet_bc_expr << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Dimension") << "| " << dimension
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Nx") << "| " << num_x << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Ny") << "| " << num_y << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Nz") << "| " << num_z << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Solver") << "| " << solver << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Tolerance") << "| " << tolerance
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Maximum iterations") << "| " << max_iter
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Initial guess") << "| " << init_guess_expr
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Forcing term") << "| " << forcing_term_expr
+                      << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Dirichlet BC") << "| " << dirichlet_bc_expr
+                      << std::endl;
             if (!exact_sol_expr.empty()) {
-                std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Exact solution") << "| " << exact_sol_expr << std::endl;
+                std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                          << centered("Exact solution") << "| "
+                          << exact_sol_expr << std::endl;
             }
-            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH) << centered("Output file") << "| " << output_file << std::endl;
+            std::cout << '|' << std::setw(_PARAM_PRINT_KEY_WIDTH)
+                      << centered("Output file") << "| " << output_file
+                      << std::endl;
         }
 
        private:
@@ -215,12 +266,15 @@ namespace fin_diff {
         void check_valid() {
             // Check if the dimension is valid
             if (dimension != 2 && dimension != 3) {
-                std::cerr << "Error: Invalid dimension: " << dimension << std::endl;
+                std::cerr << "Error: Invalid dimension: " << dimension
+                          << std::endl;
                 throw std::invalid_argument("Invalid dimension");
             }
 
-            if ((dimension == 3 && num_z == 0) || (dimension == 2 && num_z != 0)) {
-                std::cerr << "Error: Invalid number of z: " << num_z << " in " << dimension << "D" << std::endl;
+            if ((dimension == 3 && num_z == 0) ||
+                (dimension == 2 && num_z != 0)) {
+                std::cerr << "Error: Invalid number of z: " << num_z << " in "
+                          << dimension << "D" << std::endl;
                 throw std::invalid_argument("Invalid number of z");
             }
 
@@ -232,14 +286,17 @@ namespace fin_diff {
 
             // Check if the tolerance is valid
             if (tolerance <= 0) {
-                std::cerr << "Error: Invalid tolerance: " << tolerance << std::endl;
+                std::cerr << "Error: Invalid tolerance: " << tolerance
+                          << std::endl;
                 throw std::invalid_argument("Invalid tolerance");
             }
 
             // Check if the maximum number of iterations is valid
             if (max_iter <= 0) {
-                std::cerr << "Error: Invalid maximum number of iterations: " << max_iter << std::endl;
-                throw std::invalid_argument("Invalid maximum number of iterations");
+                std::cerr << "Error: Invalid maximum number of iterations: "
+                          << max_iter << std::endl;
+                throw std::invalid_argument(
+                    "Invalid maximum number of iterations");
             }
 
             // Check if the output folder is valid

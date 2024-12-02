@@ -6,9 +6,15 @@
 #include <iostream>
 #include <unordered_map>
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 namespace fin_diff {
 
-    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& c,
+    Mesh2D::Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>& c,
                    const std::vector<std::pair<size_t, size_t>>& l,
                    const std::vector<std::array<size_t, 4>>& f)
         : N_pt(c.size()), N_el(l.size()), coordinates(c), lines(l), faces(f) {
@@ -38,7 +44,7 @@ namespace fin_diff {
 #endif
     }
 
-    Mesh2D::Mesh2D(const std::vector<std::pair<double, double>>& c,
+    Mesh2D::Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>& c,
                    const std::vector<std::pair<size_t, size_t>>& l,
                    const std::vector<std::array<size_t, 4>>& f,
                    const std::vector<bool>& b)
@@ -61,7 +67,7 @@ namespace fin_diff {
 #endif
     }
 
-    const std::vector<std::pair<double, double>>& Mesh2D::get_coordinates()
+    const std::vector<std::pair<PrecisionType, PrecisionType>>& Mesh2D::get_coordinates()
         const {
         return coordinates;
     }
@@ -124,7 +130,7 @@ namespace fin_diff {
     }
 
     void Mesh2D::write_field_to_vtk(const std::string& filename,
-                                    const std::vector<double>& field,
+                                    const std::vector<PrecisionType>& field,
                                     const std::string field_name) const {
         std::ofstream file(filename);
 
@@ -178,25 +184,25 @@ namespace fin_diff {
         file.close();
     }
 
-    std::vector<double> Mesh2D::get_field_from_expr(
+    std::vector<PrecisionType> Mesh2D::get_field_from_expr(
         const std::string& expr) const {
 #ifdef __DEBUG__
         std::cout << "Generating field from expression: " << expr << std::endl;
 #endif
-        double x, y;
+        PrecisionType x, y;
 
-        exprtk::symbol_table<double> symbol_table;
+        exprtk::symbol_table<PrecisionType> symbol_table;
         symbol_table.add_variable("x", x);
         symbol_table.add_variable("y", y);
         symbol_table.add_constants();
 
-        exprtk::expression<double> expression;
+        exprtk::expression<PrecisionType> expression;
         expression.register_symbol_table(symbol_table);
 
-        exprtk::parser<double> parser;
+        exprtk::parser<PrecisionType> parser;
         parser.compile(expr, expression);
 
-        std::vector<double> field(N_pt, 0.0);
+        std::vector<PrecisionType> field(N_pt, 0.0);
         for (size_t i = 0; i < N_pt; i++) {
             x = coordinates[i].first;
             y = coordinates[i].second;
@@ -237,23 +243,23 @@ namespace fin_diff {
 #endif
     }
 
-    const std::vector<std::pair<double, double>>& RectMesh2D::get_coordinates()
+    const std::vector<std::pair<PrecisionType, PrecisionType>>& RectMesh2D::get_coordinates()
         const {
         return coordinates;
     }
 
-    std::vector<std::pair<double, double>> RectMesh2D::generate_coordinates(
+    std::vector<std::pair<PrecisionType, PrecisionType>> RectMesh2D::generate_coordinates(
         size_t Nx, size_t Ny) {
         // Throw error if Nx or Ny is less than 2
         if (Nx < 2 || Ny < 2) {
             throw std::invalid_argument("Nx and Ny must be greater than 1");
         }
 
-        std::vector<std::pair<double, double>> coords;
+        std::vector<std::pair<PrecisionType, PrecisionType>> coords;
         coords.reserve(Nx * Ny);
 
-        double dx = 1.0 / (Nx - 1);
-        double dy = 1.0 / (Ny - 1);
+        PrecisionType dx = 1.0 / (Nx - 1);
+        PrecisionType dy = 1.0 / (Ny - 1);
 
         for (size_t j = 0; j < Ny; j++) {
             for (size_t i = 0; i < Nx; i++) {

@@ -16,22 +16,27 @@ using PrecisionType = double;
 namespace fin_diff {
 
     class Discretisation {
-    public:
-        // explicit Discretisation(Mesh2D* m) : mesh(std::shared_ptr<Mesh2D>(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
-        explicit Discretisation(std::shared_ptr<Mesh2D> m) : mesh(std::move(m)), lhs(mesh->get_num_points(), mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
+       public:
+        // explicit Discretisation(Mesh2D* m) :
+        // mesh(std::shared_ptr<Mesh2D>(m)), lhs(mesh->get_num_points(),
+        // mesh->get_num_points()), rhs(mesh->get_num_points(), 1) {}
+        explicit Discretisation(std::shared_ptr<Mesh2D> m)
+            : mesh(std::move(m)),
+              lhs(mesh->get_num_points(), mesh->get_num_points()),
+              rhs(mesh->get_num_points(), 1) {}
 
         virtual ~Discretisation() = default;
 
-        virtual MatrixCRS<double> get_lhs() { return lhs; }
-        virtual Matrix<double> get_rhs() { return rhs; }
+        virtual MatrixCRS<PrecisionType> get_lhs() { return lhs; }
+        virtual Matrix<PrecisionType> get_rhs() { return rhs; }
 
         virtual const Mesh2D& get_mesh() const { return *mesh; };
 
-    protected:
+       protected:
         std::shared_ptr<Mesh2D> mesh;
 
-        MatrixCRS<double> lhs;
-        Matrix<double> rhs;
+        MatrixCRS<PrecisionType> lhs;
+        Matrix<PrecisionType> rhs;
     };
 
     class Discretisation2D : public Discretisation {
@@ -41,36 +46,43 @@ namespace fin_diff {
 
         ~Discretisation2D();
 
-        MatrixCRS<double> get_lhs() override{ 
+        MatrixCRS<PrecisionType> get_lhs() override {
             _calculate_lhs();
             return lhs;
         }
-        Matrix<double> get_rhs() override{ 
+        Matrix<PrecisionType> get_rhs() override {
             _calculate_rhs();
             return rhs;
         }
 
-        void add_forcing_term(double val);
-        void add_forcing_term(const std::function<double(double, double)>& func);
+        void add_forcing_term(PrecisionType val);
+        void add_forcing_term(
+            const std::function<PrecisionType(PrecisionType, PrecisionType)>&
+                func);
         void add_forcing_term(const std::string& expr);
 
-        void add_dirichlet_bc(double val);
-        void add_dirichlet_bc(const std::function<double(double, double)>& func);
+        void add_dirichlet_bc(PrecisionType val);
+        void add_dirichlet_bc(
+            const std::function<PrecisionType(PrecisionType, PrecisionType)>&
+                func);
         void add_dirichlet_bc(const std::string& expr);
 
         void clear_forcing_term();
         void clear_dirichlet_bc();
 
-        const RectMesh2D& get_mesh() const { return static_cast<const RectMesh2D&>(*mesh); }
-
+        const RectMesh2D& get_mesh() const {
+            return static_cast<const RectMesh2D&>(*mesh);
+        }
 
        private:
-        std::vector<double> forcing_terms_val;
-        std::vector<std::function<double(double, double)>> forcing_terms_func;
+        std::vector<PrecisionType> forcing_terms_val;
+        std::vector<std::function<PrecisionType(PrecisionType, PrecisionType)>>
+            forcing_terms_func;
         std::vector<std::string> forcing_terms_expr;
 
-        std::vector<double> dirichlet_bcs_val;
-        std::vector<std::function<double(double, double)>> dirichlet_bcs_func;
+        std::vector<PrecisionType> dirichlet_bcs_val;
+        std::vector<std::function<PrecisionType(PrecisionType, PrecisionType)>>
+            dirichlet_bcs_func;
         std::vector<std::string> dirichlet_bcs_expr;
 
         void _calculate() {
@@ -78,7 +90,7 @@ namespace fin_diff {
             if (get_mesh().get_Nx() == 0 || get_mesh().get_Ny() == 0) {
                 throw std::runtime_error("Mesh is not set");
             }
-            
+
             _calculate_rhs();
             _calculate_lhs();
         };

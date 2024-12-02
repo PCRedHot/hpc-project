@@ -13,6 +13,20 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+# Set the preprocessor definition based on the precision option
+if(NOT DEFINED PRECISION)
+  set(PRECISION "double")
+endif()
+
+if (PRECISION STREQUAL "double")
+    add_compile_definitions(PRECISION_DOUBLE)
+elseif (PRECISION STREQUAL "float")
+    add_compile_definitions(PRECISION_FLOAT)
+else()
+    message(FATAL_ERROR "Invalid precision specified. Use 'double' or 'float'.")
+endif()
+message(STATUS "Precision: ${PRECISION}")
+
 add_subdirectory(src)
 
 # Add the executable

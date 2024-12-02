@@ -8,23 +8,36 @@
 
 #include "exprtk.hpp"
 
+#ifdef PRECISION_FLOAT
+using PrecisionType = float;
+#else
+using PrecisionType = double;
+#endif
+
 namespace fin_diff {
 
     class Mesh2D {
         // Assume square
-
        public:
-        Mesh2D(const std::vector<std::pair<double, double>> &coordinates,
-               const std::vector<std::pair<size_t, size_t>> &lines) : Mesh2D(coordinates, lines, std::vector<std::array<size_t, 4>>()) {};
-        Mesh2D(const std::vector<std::pair<double, double>> &coordinates,
+        Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>
+                   &coordinates,
+               const std::vector<std::pair<size_t, size_t>> &lines)
+            : Mesh2D(coordinates, lines, std::vector<std::array<size_t, 4>>()) {
+              };
+        Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>
+                   &coordinates,
                const std::vector<std::pair<size_t, size_t>> &lines,
-               const std::vector<bool> &boundary) : Mesh2D(coordinates, lines, std::vector<std::array<size_t, 4>>(), boundary) {};
-        Mesh2D(const std::vector<std::pair<double, double>> &coordinates,
+               const std::vector<bool> &boundary)
+            : Mesh2D(coordinates, lines, std::vector<std::array<size_t, 4>>(),
+                     boundary) {};
+        Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>
+                   &coordinates,
                const std::vector<std::pair<size_t, size_t>> &lines,
-               const std::vector<std::array<size_t, 4>>& faces);
-        Mesh2D(const std::vector<std::pair<double, double>> &coordinates,
+               const std::vector<std::array<size_t, 4>> &faces);
+        Mesh2D(const std::vector<std::pair<PrecisionType, PrecisionType>>
+                   &coordinates,
                const std::vector<std::pair<size_t, size_t>> &lines,
-               const std::vector<std::array<size_t, 4>>& faces,
+               const std::vector<std::array<size_t, 4>> &faces,
                const std::vector<bool> &boundary);
         virtual ~Mesh2D();
 
@@ -34,27 +47,29 @@ namespace fin_diff {
         std::vector<bool> get_boundary() const { return boundary; }
         bool is_boundary(size_t i) const { return boundary[i]; }
 
-        virtual const std::vector<std::pair<double, double>> &get_coordinates() const;
+        virtual const std::vector<std::pair<PrecisionType, PrecisionType>> &
+        get_coordinates() const;
         virtual const std::vector<std::pair<size_t, size_t>> &get_lines() const;
         virtual const std::vector<std::array<size_t, 4>> &get_faces() const;
 
         void write_to_vtk(const std::string &filename) const;
 
-        std::vector<double> get_empty_field() const {
-            return std::vector<double>(N_pt, 0.0);
+        std::vector<PrecisionType> get_empty_field() const {
+            return std::vector<PrecisionType>(N_pt, 0.0);
         }
 
-        std::vector<double> get_field_from_expr(const std::string &expr) const;
+        std::vector<PrecisionType> get_field_from_expr(
+            const std::string &expr) const;
 
         void write_field_to_vtk(const std::string &filename,
-                                const std::vector<double> &field,
+                                const std::vector<PrecisionType> &field,
                                 const std::string field_name) const;
 
        protected:
         size_t N_pt;
         size_t N_el;
 
-        std::vector<std::pair<double, double>> coordinates;
+        std::vector<std::pair<PrecisionType, PrecisionType>> coordinates;
         std::vector<std::pair<size_t, size_t>> lines;
         std::vector<std::array<size_t, 4>> faces;
 
@@ -70,19 +85,20 @@ namespace fin_diff {
         size_t get_Nx() const { return Nx; }
         size_t get_Ny() const { return Ny; }
 
-        double get_dx() const { return dx; }
-        double get_dy() const { return dy; }
+        PrecisionType get_dx() const { return dx; }
+        PrecisionType get_dy() const { return dy; }
 
-        const std::vector<std::pair<double, double>> &get_coordinates()
-            const override;
+        const std::vector<std::pair<PrecisionType, PrecisionType>> &
+        get_coordinates() const override;
 
        private:
         size_t Nx, Ny;
-        double dx, dy;
+        PrecisionType dx, dy;
 
-        std::vector<std::pair<double, double>> generate_coordinates(size_t Nx,
-                                                                    size_t Ny);
-        std::vector<std::pair<size_t, size_t>> generate_lines(size_t Nx, size_t Ny);
+        std::vector<std::pair<PrecisionType, PrecisionType>>
+        generate_coordinates(size_t Nx, size_t Ny);
+        std::vector<std::pair<size_t, size_t>> generate_lines(size_t Nx,
+                                                              size_t Ny);
         std::vector<std::array<size_t, 4>> generate_faces(size_t Nx, size_t Ny);
     };
 
